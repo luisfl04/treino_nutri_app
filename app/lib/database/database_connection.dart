@@ -26,6 +26,7 @@ class DatabaseConnection {
     final basePath = await getDatabasesPath();
     final filePath = join(basePath, nameDB);
 
+    await deleteDatabase(filePath);
     return await openDatabase (
         filePath,
         version: 1,
@@ -50,6 +51,7 @@ class DatabaseConnection {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           name TEXT NOT NULL,
           email TEXT NOT NULL UNIQUE,
+          username TEXT NOT NULL UNIQUE,
           password_hash TEXT,
           created_at TEXT NOT NULL,
           active INTEGER DEFAULT 1
