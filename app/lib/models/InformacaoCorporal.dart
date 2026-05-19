@@ -15,7 +15,6 @@ class InformacaoCorporal {
     return InformacaoCorporal(
       id: map['id'],
       usuarioId: map['usuario_id'],
-      // Garante a conversão para double caso o banco retorne int ou string
       peso: map['peso']?.toDouble() ?? 0.0,
       altura: map['altura']?.toDouble() ?? 0.0,
     );
