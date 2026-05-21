@@ -100,7 +100,7 @@ class PerfilController {
   Future<Endereco?> _buscarEnderecoDoUsuario(String uuid) async {
     final resultados = await _enderecoRepo.buscarPorSqlPersonalizado(
       'SELECT * FROM Endereco WHERE usuario_uuid = ? LIMIT 1',
-      [uid],
+      [uuid],
     );
     return resultados.isNotEmpty ? resultados.first : null;
   }
