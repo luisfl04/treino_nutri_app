@@ -1,49 +1,48 @@
 class Usuario {
-  final int? id;
-  final int? uuid;
+  final String? uuid;
   final String nome;
-  final String usuario;
+  final String username;
   final String? hash_senha;
   final DateTime data_nascimento;
   final String? email;
   final String? path_foto_perfil;
   final String sexo;
   final DateTime data_criacao;
+  final bool? ativo;
 
   Usuario({
-   this.id,
-   this.uuid,
-   required this.nome,
-   required this.usuario,
-   this.hash_senha,
-   required this.data_nascimento,
-   this.email,
-   this.path_foto_perfil,
-   required this.sexo,
-   required this.data_criacao
+     this.uuid,
+     required this.nome,
+     required this.username,
+     this.hash_senha,
+     required this.data_nascimento,
+     this.email,
+     this.path_foto_perfil,
+     required this.sexo,
+     required this.data_criacao,
+     this.ativo
   });
 
   factory Usuario.fromMap(Map<String, dynamic> usuario_map) {
     return Usuario(
-      id: usuario_map['id'],
       uuid: usuario_map['uuid'],
       nome: usuario_map['nome'],
-      usuario: usuario_map['usuario'],
+      username: usuario_map['usuario'],
       hash_senha: usuario_map['senha'],
       data_nascimento: usuario_map['data_nascimento'],
       email: usuario_map['email'] ?? null,
       path_foto_perfil: usuario_map['foto'],
       sexo: usuario_map['sexo'],
       data_criacao: usuario_map['data_criacao'],
+      ativo: usuario_map['ativo'] ?? false
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'uuid': uuid,
       'nome': nome,
-      "usuario": usuario,
+      "username": username,
       "hash_senha": hash_senha,
       "data_nascimento": data_nascimento,
       "email": email,
@@ -55,10 +54,9 @@ class Usuario {
 
   Map<String, dynamic> toPublicJson() {
     return {
-      'id': id,
       'uuid': uuid,
       'nome': nome,
-      "usuario": usuario,
+      "username": username,
       "data_nascimento": data_nascimento,
       "email": email,
       "path_foto_perfil": path_foto_perfil,

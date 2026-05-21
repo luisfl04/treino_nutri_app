@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:app/database/database_connection.dart';
 import 'package:app/models/Meta.dart';
-import 'BaseRepository.dart';
+import 'BaseRepositoryLocal.dart';
 
-class MetaRepository implements BaseRepository<Meta> {
+class MetaRepository implements BaseRepositoryLocal<Meta> {
   final String _tableName = 'Meta';
   Future<Database> get _db async => await DatabaseConnection().db;
 

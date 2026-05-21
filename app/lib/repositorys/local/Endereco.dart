@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:app/database/database_connection.dart';
 import 'package:app/models/Endereco.dart';
-import 'BaseRepository.dart';
+import 'BaseRepositoryLocal.dart';
 
-class EnderecoRepository implements BaseRepository<Endereco> {
+class EnderecoRepository implements BaseRepositoryLocal<Endereco> {
   final String _tableName = 'Endereco';
   Future<Database> get _db async => await DatabaseConnection().db;
 

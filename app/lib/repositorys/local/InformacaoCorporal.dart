@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:app/database/database_connection.dart';
 import 'package:app/models/InformacaoCorporal.dart';
-import 'BaseRepository.dart';
+import 'BaseRepositoryLocal.dart';
 
-class InformacaoCorporalRepository implements BaseRepository<InformacaoCorporal> {
+class InformacaoCorporalRepository implements BaseRepositoryLocal<InformacaoCorporal> {
   final String _tableName = 'InformacaoCorporal';
   Future<Database> get _db async => await DatabaseConnection().db;
 

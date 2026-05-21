@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:app/database/database_connection.dart';
 import 'package:app/models/Treino.dart';
-import 'BaseRepository.dart';
+import 'BaseRepositoryLocal.dart';
 
-class TreinoRepository implements BaseRepository<Treino> {
+class TreinoRepository implements BaseRepositoryLocal<Treino> {
   final String _tableName = 'Treino';
   Future<Database> get _db async => await DatabaseConnection().db;
 

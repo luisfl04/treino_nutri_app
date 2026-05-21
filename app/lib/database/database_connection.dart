@@ -46,9 +46,8 @@ class DatabaseConnection {
   List<String> getScriptsCriacao() {
     return [
       """
-      CREATE TABLE IF NOT EXISTS Usuario (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          uuid TEXT UNIQUE,
+      CREATE TABLE IF NOT EXISTS Usuario {
+          uuid TEXT UNIQUE NOT NULL,
           name TEXT NOT NULL,
           email TEXT NOT NULL UNIQUE,
           username TEXT NOT NULL UNIQUE,
@@ -65,55 +64,55 @@ class DatabaseConnection {
       """
       CREATE TABLE IF NOT EXISTS Meta (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          usuario_id INTEGER NOT NULL,
+          usuario_uuid TEXT NOT NULL,
           init_date TEXT NOT NULL,
           end_date TEXT NOT NULL,
           percentage INTEGER NOT NULL DEFAULT 0,
-          FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE
+          FOREIGN KEY (usuario_uuid) REFERENCES Usuario (uuid) ON DELETE CASCADE
       );""",
       """
       CREATE TABLE IF NOT EXISTS Endereco (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          usuario_id INTEGER NOT NULL,
+          usuario_uuid TEXT NOT NULL,
           cep TEXT,
           road TEXT,
           city TEXT,
           state TEXT,
           complement TEXT,
-          FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE
+          FOREIGN KEY (usuario_uuid) REFERENCES Usuario (uuid) ON DELETE CASCADE
       );""",
       """
       CREATE TABLE IF NOT EXISTS InformacaoCorporal (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          usuario_id INTEGER NOT NULL,
+          usuario_uuid TEXT INTEGER NOT NULL,
           weight REAL,
           height REAL,
-          FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE
+          FOREIGN KEY (usuario_uuid) REFERENCES Usuario (uuid) ON DELETE CASCADE
       );""",
       """
       CREATE TABLE IF NOT EXISTS Treino (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          usuario_id INTEGER NOT NULL,
+          usuario_uuid TEXT NOT NULL,
           tipo_treino_id INTEGER NOT NULL,
           meta_id INTEGER,
           day_period TEXT NOT NULL,
           done INTEGER NOT NULL DEFAULT 0,
           calories REAL,
           photo TEXT,
-          FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE,
+          FOREIGN KEY (usuario_uuid) REFERENCES Usuario (uuid) ON DELETE CASCADE,
           FOREIGN KEY (tipo_treino_id) REFERENCES TipoTreino (id),
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
       );""",
       """
       CREATE TABLE IF NOT EXISTS Alimentacao (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
-          usuario_id INTEGER NOT NULL,
+          usuario_uuid TEXT NOT NULL,
           meta_id INTEGER,
           snack_type TEXT NOT NULL,
           done INTEGER NOT NULL DEFAULT 0,
           caloric_value REAL,
           photo TEXT,
-          FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE,
+          FOREIGN KEY (usuario_uuid) REFERENCES Usuario (uuid) ON DELETE CASCADE,
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
       );""",
     ];

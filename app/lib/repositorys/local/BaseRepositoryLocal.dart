@@ -1,13 +1,12 @@
 import 'package:sqflite/sqflite.dart';
 
-abstract class BaseRepository<T> {
+abstract class BaseRepositoryLocal<T> {
 
   Future<int> inserir(T objeto);
 
   Future<int> atualizarPorId(int id, T objeto);
 
   Future<int> removerPorId(int id);
-
 
   Future<T?> buscarPorId(int id);
 
