@@ -52,7 +52,7 @@ class DatabaseConnection {
           name TEXT NOT NULL,
           email TEXT NOT NULL UNIQUE,
           username TEXT NOT NULL UNIQUE,
-          password_hash TEXT,
+          hash_senha TEXT,
           created_at TEXT NOT NULL,
           active INTEGER DEFAULT 1
       );""",
