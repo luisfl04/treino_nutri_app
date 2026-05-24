@@ -7,29 +7,6 @@ class UsuarioRepository implements BaseRepository<Usuario> {
   final String _tableName = 'Usuario';
   Future<Database> get _db async => await DatabaseConnection().db;
 
-  final DatabaseConnection _dbConnection = DatabaseConnection();
-
-  // Método para cadastrar um novo usuário
-  Future<int> cadastrarUsuario(Usuario usuario) async {
-    try {
-      final Database db = await _dbConnection.db;
-
-      // O método insert retorna o ID da linha inserida
-      int idSalvo = await db.insert(
-        'Usuario',
-        usuario.toMap(),
-        conflictAlgorithm: ConflictAlgorithm
-            .fail, // Falha se o email/username já existir (UNIQUE)
-      );
-
-      print("Usuário cadastrado com sucesso! ID: $idSalvo");
-      return idSalvo;
-    } catch (e) {
-      print("Erro ao cadastrar usuário: $e");
-      rethrow; // Repassa o erro para a tela tratar (ex: mostrar um SnackBar)
-    }
-  }
-
   @override
   Future<int> inserir(Usuario usuario) async {
     final dbClient = await _db;
