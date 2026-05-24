@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:treino_nutri_app/models/Usuario.dart';
 import 'package:treino_nutri_app/routes/app_routes.dart';
+import 'package:treino_nutri_app/controllers/AuthController.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -11,7 +13,12 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _usuarioController;
   late TextEditingController _senhaController;
+
   bool _obscurePassword = true;
+  bool _isLoading = false; // Novo: Controle de carregamento
+
+  // Novo: Instanciando o seu Controller
+  final AuthController _authController = AuthController();
 
   @override
   void initState() {
@@ -27,19 +34,33 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    if (_usuarioController.text.isEmpty || _senhaController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
+  Future<void> _handleLogin() async {
+    setState(() => _isLoading = true); // Se você tiver o loading
 
-    // Navega para home
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+    try {
+      // 1. Tenta fazer o login. Se der sucesso, recebe o Usuario.
+      Usuario usuarioLogado = await _authController.entrar(
+        login: _usuarioController.text,
+        senha: _senhaController.text,
+      );
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      // 2. Navega para a Home PASSANDO O USUÁRIO LOGADO nos arguments!
+      Navigator.of(context).pushReplacementNamed(
+        AppRoutes.home,
+        arguments: usuarioLogado, // <-- A MÁGICA ACONTECE AQUI
+      );
+    } catch (erro) {
+      // Se o controller der um 'throw', cai aqui no catch
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(erro.toString()), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -56,11 +77,12 @@ class _LoginScreenState extends State<LoginScreen> {
               // Logo
               Image.asset('assets/images/logo_app.png', height: 250),
               const SizedBox(height: 20),
+
               // Campo Nome de Usuário
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Nome de Usuário',
+                  'Nome de Usuário ou E-mail', // Atualizei a label para ficar mais claro
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -97,6 +119,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
               // Campo Senha
               Align(
                 alignment: Alignment.centerLeft,
@@ -150,11 +173,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-              // Botão Entrar
+
+              // Botão Entrar com Animação de Carregamento
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _handleLogin,
+                  // Desativa o botão (passando null) se estiver carregando
+                  onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1B7E3D),
                     padding: const EdgeInsets.symmetric(vertical: 16),
@@ -162,17 +187,27 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
-                    'ENTRAR',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'ENTRAR',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),
+
               // Link para criar conta
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -182,8 +217,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                   ),
                   GestureDetector(
-                    onTap: () => Navigator.of(context).pushNamed(AppRoutes.cadastro),
-                    child: Text(
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.cadastro),
+                    child: const Text(
                       "Criar Conta",
                       style: TextStyle(
                         fontSize: 14,

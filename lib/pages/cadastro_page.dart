@@ -4,7 +4,8 @@ import 'package:treino_nutri_app/routes/app_routes.dart';
 
 // Importe aqui a sua classe DatabaseConnection!
 // Ajuste o caminho abaixo conforme a pasta onde você criou o arquivo database_connection.dart
-import 'package:treino_nutri_app/database/database_connection.dart'; 
+import 'package:treino_nutri_app/database/database_connection.dart';
+import 'package:treino_nutri_app/controllers/UsuarioController.dart';
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -18,15 +19,17 @@ class _CadastroPageState extends State<CadastroPage> {
   late TextEditingController _usuarioController;
   late TextEditingController _senhaController;
   late TextEditingController _confirmaSenhaController;
-  
+
   // Novos controladores para Peso e Altura
   late TextEditingController _pesoController;
   late TextEditingController _alturaController;
-  
+
   String? _sexoSelecionado;
   bool _obscureSenha = true;
   bool _obscureConfirmaSenha = true;
-  
+
+  final UsuarioController _usuarioControllerObj = UsuarioController();
+
   // Novo estado para controlar o botão de carregamento
   bool _isLoading = false;
 
@@ -53,103 +56,41 @@ class _CadastroPageState extends State<CadastroPage> {
   }
 
   Future<void> _handleRegister() async {
-    // Validação básica
-    if (_emailController.text.isEmpty ||
-        _usuarioController.text.isEmpty ||
-        _senhaController.text.isEmpty ||
-        _confirmaSenhaController.text.isEmpty ||
-        _pesoController.text.isEmpty ||
-        _alturaController.text.isEmpty ||
-        _sexoSelecionado == null) {
+    setState(() => _isLoading = true);
+
+    // 2. Chama o Controller passando todos os dados da tela
+    String? erro = await _usuarioControllerObj.cadastrarUsuario(
+      email: _emailController.text,
+      usuario: _usuarioController.text,
+      senha: _senhaController.text,
+      confirmaSenha: _confirmaSenhaController.text,
+      pesoStr: _pesoController.text,
+      alturaStr: _alturaController.text,
+      sexoSelecionado: _sexoSelecionado,
+    );
+
+    if (!mounted) return;
+    setState(() => _isLoading = false);
+
+    // 3. Se o controller retornou um erro, mostra a mensagem vermelha
+    if (erro != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text(erro), backgroundColor: Colors.red),
       );
-      return;
+      return; // Para a execução aqui
     }
 
-    // Validar se as senhas são iguais
-    if (_senhaController.text != _confirmaSenhaController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('As senhas não conferem'),
-          backgroundColor: Colors.red,
+    // 4. Se o erro for null, deu sucesso! Mostra mensagem verde e muda de tela
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Cadastro realizado com sucesso, ${_usuarioController.text}!',
         ),
-      );
-      return;
-    }
+        backgroundColor: Colors.green,
+      ),
+    );
 
-    // Inicia o estado de carregamento
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // 1. Instancia o banco de dados
-      final dbConnection = DatabaseConnection();
-      final Database db = await dbConnection.db;
-
-      // 2. Cria uma transação para salvar tudo junto com segurança
-      await db.transaction((txn) async {
-        // Insere na tabela de Usuário
-        // Como você não tem um campo 'Nome Completo', usaremos o username para a coluna 'name'
-        int idUsuario = await txn.insert(
-          'Usuario', 
-          {
-            'name': _usuarioController.text.trim(),
-            'email': _emailController.text.trim(),
-            'username': _usuarioController.text.trim(),
-            'password_hash': _senhaController.text, // Numa versão em produção, encripte a senha
-            'created_at': DateTime.now().toIso8601String(),
-            'active': 1,
-          },
-          conflictAlgorithm: ConflictAlgorithm.fail, // Falha se e-mail/username já existir
-        );
-
-        // Prepara os dados corporais (tratando vírgula para ponto)
-        double pesoDigitado = double.tryParse(_pesoController.text.replaceAll(',', '.')) ?? 0.0;
-        double alturaDigitada = double.tryParse(_alturaController.text.replaceAll(',', '.')) ?? 0.0;
-
-        // Insere na tabela de Informação Corporal usando o ID gerado do Usuário
-        await txn.insert('InformacaoCorporal', {
-          'usuario_id': idUsuario,
-          'weight': pesoDigitado,
-          'height': alturaDigitada,
-        });
-      });
-
-      // Se passou pela transação sem cair no catch, foi um sucesso!
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cadastro realizado com sucesso, ${_usuarioController.text}!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        // Navegar para home ou login
-        Navigator.of(context).pushReplacementNamed(AppRoutes.home);
-      }
-    } catch (e) {
-      if (mounted) {
-        // Provavelmente um erro de UNIQUE (e-mail ou username já cadastrados)
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro ao cadastrar. E-mail ou Usuário já existem!'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        print('Erro no DB: $e'); // Para você debugar no terminal
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
   }
 
   @override
@@ -188,7 +129,7 @@ class _CadastroPageState extends State<CadastroPage> {
               // Seção de Foto
               _buildPhotoSection(),
               const SizedBox(height: 40),
-              
+
               // Campo E-mail
               _buildTextField(
                 label: 'E-mail',
@@ -197,7 +138,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 keyboardType: TextInputType.emailAddress,
               ),
               const SizedBox(height: 20),
-              
+
               // Campo Usuário
               _buildTextField(
                 label: 'Usuário',
@@ -205,7 +146,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 hintText: 'Digite seu usuário',
               ),
               const SizedBox(height: 20),
-              
+
               // Campo Senha
               _buildPasswordField(
                 label: 'Senha',
@@ -217,7 +158,7 @@ class _CadastroPageState extends State<CadastroPage> {
                 },
               ),
               const SizedBox(height: 20),
-              
+
               // Campo Confirma Senha
               _buildPasswordField(
                 label: 'Confirma senha',
@@ -225,7 +166,9 @@ class _CadastroPageState extends State<CadastroPage> {
                 hintText: 'Confirme sua senha',
                 obscureText: _obscureConfirmaSenha,
                 onToggle: () {
-                  setState(() => _obscureConfirmaSenha = !_obscureConfirmaSenha);
+                  setState(
+                    () => _obscureConfirmaSenha = !_obscureConfirmaSenha,
+                  );
                 },
               ),
               const SizedBox(height: 20),
@@ -235,7 +178,9 @@ class _CadastroPageState extends State<CadastroPage> {
                 label: 'Peso Atual (kg)',
                 controller: _pesoController,
                 hintText: 'Ex: 75.5',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -244,14 +189,16 @@ class _CadastroPageState extends State<CadastroPage> {
                 label: 'Altura (m)',
                 controller: _alturaController,
                 hintText: 'Ex: 1.75',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
               ),
               const SizedBox(height: 20),
-              
+
               // Campo Sexo
               _buildSexoField(),
               const SizedBox(height: 40),
-              
+
               // Botão Cadastrar
               _buildRegisterButton(),
             ],
@@ -304,11 +251,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     color: const Color(0xFF1B7E3D),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.add,
-                    color: Colors.white,
-                    size: 24,
-                  ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 24),
                 ),
               ),
             ],
@@ -358,22 +301,15 @@ class _CadastroPageState extends State<CadastroPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
-              ),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
-              ),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF1B7E3D),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF1B7E3D), width: 2),
             ),
           ),
         ),
@@ -413,22 +349,15 @@ class _CadastroPageState extends State<CadastroPage> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
-              ),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Colors.grey[300]!,
-              ),
+              borderSide: BorderSide(color: Colors.grey[300]!),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF1B7E3D),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF1B7E3D), width: 2),
             ),
             suffixIcon: IconButton(
               icon: Icon(
@@ -526,7 +455,7 @@ class _CadastroPageState extends State<CadastroPage> {
       width: double.infinity,
       child: ElevatedButton(
         // Desabilita o clique se estiver carregando
-        onPressed: _isLoading ? null : _handleRegister, 
+        onPressed: _isLoading ? null : _handleRegister,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF1B7E3D),
           padding: const EdgeInsets.symmetric(vertical: 16),

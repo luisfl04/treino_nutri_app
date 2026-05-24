@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:treino_nutri_app/routes/app_routes.dart';
 import 'package:treino_nutri_app/widgets/bottom_navigation_widget.dart';
-
-// Importe sua conexão com o banco de dados
-import 'package:treino_nutri_app/database/database_connection.dart';
+import 'package:treino_nutri_app/models/Usuario.dart'; // Importe o seu model!
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,55 +12,25 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
-  
-  // Variável para guardar o nome do usuário vindo do banco
-  String _nomeUsuario = 'Carregando...';
 
-  @override
-  void initState() {
-    super.initState();
-    // Assim que a tela abrir, vamos buscar o nome do usuário
-    _carregarUsuario();
-  }
+  // Removido o _carregarUsuario() e o initState()! A Home agora é muito mais leve e rápida.
 
-  // Método que vai no Sqflite buscar o nome do usuário
-  Future<void> _carregarUsuario() async {
-    try {
-      final dbConnection = DatabaseConnection();
-      final db = await dbConnection.db;
-
-      // Vamos buscar o último usuário cadastrado (ordenando pelo ID decrescente)
-      final List<Map<String, dynamic>> usuarios = await db.query(
-        'Usuario',
-        orderBy: 'id DESC',
-        limit: 1,
-      );
-
-      if (mounted) {
-        setState(() {
-          if (usuarios.isNotEmpty) {
-            // Se encontrou, pega o campo 'name' ou 'username' (ajuste conforme preferir)
-            _nomeUsuario = usuarios.first['name'] ?? 'Visitante';
-            
-            // Dica: Se quiser mostrar só o primeiro nome, você pode fazer um split:
-            // _nomeUsuario = usuarios.first['name'].split(' ')[0];
-          } else {
-            _nomeUsuario = 'Visitante'; // Fallback se o banco estiver vazio
-          }
-        });
-      }
-    } catch (e) {
-      print('Erro ao carregar usuário da Home: $e');
-      if (mounted) {
-        setState(() {
-          _nomeUsuario = 'Usuário';
-        });
-      }
-    }
+  void _fazerLogout() {
+    // Retorna para o login destruindo as telas anteriores
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.login, 
+      (Route<dynamic> route) => false,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // 1. RECEBE O USUÁRIO QUE VEIO DA TELA DE LOGIN
+    final Usuario? usuarioLogado = ModalRoute.of(context)?.settings.arguments as Usuario?;
+    
+    // 2. Pega o nome. Se por algum motivo for nulo, chama de 'Visitante'
+    final String nomeExibir = usuarioLogado?.nome ?? 'Visitante';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(
@@ -71,10 +39,9 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Seção de boas-vindas com foto
+              // Seção de boas-vindas com foto e botão Sair
               Row(
                 children: [
-                  // Foto do perfil
                   Container(
                     width: 50,
                     height: 50,
@@ -84,14 +51,12 @@ class _HomePageState extends State<HomePage> {
                         color: const Color(0xFF1B7E3D),
                         width: 2,
                       ),
-                      image: DecorationImage(
-                        image: const AssetImage('assets/images/profile.png'),
+                      image: const DecorationImage(
+                        image: AssetImage('assets/images/profile.png'),
                         fit: BoxFit.cover,
-                        onError: (exception, stackTrace) {},
                       ),
                       color: Colors.grey[300],
                     ),
-                    child: const SizedBox.shrink(),
                   ),
                   const SizedBox(width: 12),
                   // Texto de boas-vindas
@@ -100,8 +65,7 @@ class _HomePageState extends State<HomePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          // Aqui estamos usando a variável dinâmica que veio do banco!
-                          'Bem vindo, $_nomeUsuario',
+                          'Bem vindo, $nomeExibir', // DINÂMICO DE VERDADE!
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -111,9 +75,22 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
+                  // Botão de Logout
+                  IconButton(
+                    onPressed: _fazerLogout,
+                    icon: const Icon(
+                      Icons.logout_rounded,
+                      color: Colors.redAccent,
+                      size: 28,
+                    ),
+                    tooltip: 'Sair',
+                  ),
                 ],
               ),
               const SizedBox(height: 32),
+              
+              // --- (TODO O RESTO DOS SEUS CARDS CONTINUAM IGUAIS AQUI) ---
+              
               // Card de Meta
               Container(
                 padding: const EdgeInsets.all(20),
@@ -131,11 +108,10 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Título e porcentagem
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
+                      children: const [
+                        Text(
                           'Meta',
                           style: TextStyle(
                             fontSize: 18,
@@ -143,7 +119,7 @@ class _HomePageState extends State<HomePage> {
                             color: Color(0xFF1B1B1B),
                           ),
                         ),
-                        const Text(
+                        Text(
                           '75%',
                           style: TextStyle(
                             fontSize: 20,
@@ -154,7 +130,6 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Descrição
                     const Text(
                       'Perde 5 Kg',
                       style: TextStyle(
@@ -164,7 +139,6 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    // Progress bar
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: LinearProgressIndicator(
@@ -182,134 +156,20 @@ class _HomePageState extends State<HomePage> {
               const SizedBox(height: 24),
               // Card Treinos
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(AppRoutes.treinos);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[200]!, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Treinos',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1B1B1B),
-                        ),
-                      ),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1B7E3D),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.fitness_center,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.treinos),
+                child: _buildActionCard('Treinos', Icons.fitness_center, const Color(0xFF1B7E3D)),
               ),
               const SizedBox(height: 12),
               // Card Alimentação
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(AppRoutes.alimentacao);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[200]!, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Alimentação',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1B1B1B),
-                        ),
-                      ),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFF9800),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.restaurant,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.alimentacao),
+                child: _buildActionCard('Alimentação', Icons.restaurant, const Color(0xFFFF9800)),
               ),
               const SizedBox(height: 12),
               // Card Metas
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(AppRoutes.metas);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 18,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey[200]!, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Metas',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1B1B1B),
-                        ),
-                      ),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF9FA8DA),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.show_chart,
-                          color: Colors.white,
-                          size: 28,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                onTap: () => Navigator.of(context).pushNamed(AppRoutes.metas),
+                child: _buildActionCard('Metas', Icons.show_chart, const Color(0xFF9FA8DA)),
               ),
             ],
           ),
@@ -322,6 +182,40 @@ class _HomePageState extends State<HomePage> {
             setState(() => _selectedIndex = index);
           }
         },
+      ),
+    );
+  }
+
+  // Refatorei os seus cards para um método só, para o código ficar mais limpo!
+  Widget _buildActionCard(String title, IconData icon, Color iconColor) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey[200]!, width: 1),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF1B1B1B),
+            ),
+          ),
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: iconColor,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 28),
+          ),
+        ],
       ),
     );
   }
