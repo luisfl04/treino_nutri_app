@@ -1,0 +1,33 @@
+- Operações da lib 'sqflite':
+    - Obter o path onde o banco está cadastrado -> getDatabasesPath()
+    - deletar arquivo do banco -> deleteDatabase(path)
+    - Criar banco -> openDatabase(path, version, onConfigure, onCreate)
+    - Rodar sql -> execute(sql_livre)
+    - inserção de valores -> db.transaction( (txn) => txn.rawInsert(Sql, lista_de_parametros))
+    - Atualização -> rawUpdate(sql, lista_de_parametros)
+    - query simples = rawQuery(sql, lista_parametros)
+    - Excluir determinado dado -> rawDelete(sql, parâmetros)
+    - fechar conexão -> db.close()
+    - Inserção de um objeto em uma tabela -> object.id = await db.insert(nomeTabela, object.toMap());
+    - Buscando objeto por id:
+          "Future<Todo> getTodo(int id) async {
+            List<Map> maps = await db.query(tableTodo,
+                columns: [columnId, columnDone, columnTitle],
+                where: '$columnId = ?',
+                whereArgs: [id]);
+            if (maps.length > 0) {
+              return Todo.fromMap(maps.first);
+            }
+            return null;
+          }"
+    - Deletando objeto por id:
+          "Future<int> delete(int id) async {
+               return await db.delete(tableTodo, where: '$columnId = ?', whereArgs: [id]);
+          }
+    - Atualizando tabela por id:
+        "
+          Future<int> update(Todo todo) async {
+            return await db.update(tableTodo, todo.toMap(),
+                where: '$columnId = ?', whereArgs: [todo.id]);}
+        "
+    - Obtendo lista de objetos: List<Map<String, Object?>> records = await db.query('my_table');

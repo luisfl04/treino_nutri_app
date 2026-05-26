@@ -5,7 +5,7 @@ import 'package:app/firestore/FirestoreService.dart';
 
 
 class UsuarioFirestoreRepository implements BaseFirestoreRepository<Usuario> {
-  final CollectionReference<Map<String, dynamic>> _colecao = FirestoreService().getCollection('usuarios');
+  final CollectionReference<Map<String, dynamic>> _colecao = FirestoreService().('usuarios');
 
   @override
   Future<String> inserir(Usuario usuario, {String? customId}) async {
