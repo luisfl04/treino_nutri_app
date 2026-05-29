@@ -2,4 +2,5 @@
 macos/
 windows/
 web/
+.flutter-plugins-dependencies
 
