@@ -22,18 +22,17 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
 
   // Função para abrir o popup
   Future<void> _abrirMenuDeExercicios() async {
-    // O showDialog retorna o que passamos no Navigator.pop() do Dialog
     final List<String>? resultado = await showDialog<List<String>>(
       context: context,
       builder: (BuildContext context) {
         return SelecaoExerciciosDialog(
-          // Passa o que já está selecionado para o popup manter marcado
           selecionadosPreviamente: meusExerciciosSelecionados,
+          tipoTreino:
+              tipoTreinoSelecionado, // <-- ENVIANDO O TIPO ATUAL DA TELA!
         );
       },
     );
 
-    // Se o usuário clicou em "Confirmar", atualizamos a lista da tela principal
     if (resultado != null) {
       setState(() {
         meusExerciciosSelecionados = resultado;
