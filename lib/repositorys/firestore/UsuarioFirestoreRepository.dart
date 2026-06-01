@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:treino_nutri_app/models/Usuario.dart';
 import 'package:treino_nutri_app/firestore/FirestoreService.dart';
 import 'package:treino_nutri_app/firestore/BaseFirestoreRepository.dart';
+=======
+// import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:treino_nutri_app/models/Usuario.dart';
+// // Lembre-se de importar suas classes Usuario, BaseFirestoreRepository e FirestoreService
+>>>>>>> lucas
 
 
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:treino_nutri_app/widgets/popup_treinos_widget.dart';
+import 'package:treino_nutri_app/controllers/TreinoController.dart'; 
 
 class TreinoCadastroPage extends StatefulWidget {
   const TreinoCadastroPage({super.key});
@@ -11,33 +12,100 @@ class TreinoCadastroPage extends StatefulWidget {
 class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
   String tipoTreinoSelecionado = 'Musculação';
   String periodoSelecionado = 'Manhã';
-  bool treinoConcluido = true;
-  String? exercicioSelecionado;
 
-  final Color corFundo = const Color(0xFFF4FAF1); // Verde bem clarinho do fundo
-  final Color corPrimaria = const Color(0xFF0F7A40); // Verde escuro dos botões
-  final Color corChipSelecionado = const Color(0xFF28C25E); // Verde claro ativo
+  // Controladores
+  final TextEditingController _caloriasController = TextEditingController();
+  final TextEditingController _dataController = TextEditingController();    // NOVO
+  final TextEditingController _duracaoController = TextEditingController(); // NOVO
+  final TextEditingController _seriesController = TextEditingController(); // NOVO
+
+  final Color corFundo = const Color(0xFFF4FAF1); 
+  final Color corPrimaria = const Color(0xFF0F7A40); 
+  final Color corChipSelecionado = const Color(0xFF28C25E); 
 
   List<String> meusExerciciosSelecionados = [];
+  final TreinoController _treinoController = TreinoController(); 
 
-  // Função para abrir o popup
-  Future<void> _abrirMenuDeExercicios() async {
-    // O showDialog retorna o que passamos no Navigator.pop() do Dialog
-    final List<String>? resultado = await showDialog<List<String>>(
+  @override
+  void dispose() {
+    _caloriasController.dispose(); 
+    _dataController.dispose();
+    _duracaoController.dispose();
+    super.dispose();
+  }
+
+  // FUNÇÃO NATIVA PARA SELECIONAR A DATA NO CALENDÁRIO
+  Future<void> _selecionarData(BuildContext context) async {
+    final DateTime? selecionada = await showDatePicker(
       context: context,
-      builder: (BuildContext context) {
-        return SelecaoExerciciosDialog(
-          // Passa o que já está selecionado para o popup manter marcado
-          selecionadosPreviamente: meusExerciciosSelecionados,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: corPrimaria, 
+            ),
+          ),
+          child: child!,
         );
       },
     );
 
-    // Se o usuário clicou em "Confirmar", atualizamos a lista da tela principal
+    if (selecionada != null) {
+      setState(() {
+        _dataController.text = "${selecionada.day.toString().padLeft(2, '0')}/${selecionada.month.toString().padLeft(2, '0')}/${selecionada.year}";
+      });
+    }
+  }
+
+  Future<void> _abrirMenuDeExercicios() async {
+    final List<String>? resultado = await showDialog<List<String>>(
+      context: context,
+      builder: (BuildContext context) {
+        return SelecaoExerciciosDialog(
+          selecionadosPreviamente: meusExerciciosSelecionados,
+          tipoTreino: tipoTreinoSelecionado, 
+        );
+      },
+    );
+
     if (resultado != null) {
       setState(() {
         meusExerciciosSelecionados = resultado;
       });
+    }
+  }
+
+  Future<void> _executarSalvar() async {
+    // Validação básica para garantir que não mandam campos vazios
+    if (_dataController.text.isEmpty || _duracaoController.text.isEmpty || _caloriasController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha a Data, Duração e Calorias!'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    final String? erro = await _treinoController.salvarTreino(
+      tipoTreinoTexto: tipoTreinoSelecionado,
+      periodoDia: periodoSelecionado,
+      caloriasStr: _caloriasController.text,
+      dataTreino: _dataController.text,
+      duracaoStr: _duracaoController.text,
+      seriesTotalStr: _seriesController.text, // <-- MANDANDO AS SÉRIES TOTAIS
+      exerciciosSelecionados: meusExerciciosSelecionados, 
+    );
+
+    if (erro != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(erro), backgroundColor: Colors.red),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Treino registado com sucesso! 🎉'), backgroundColor: Colors.green),
+      );
+      Navigator.pop(context); 
     }
   }
 
@@ -55,11 +123,7 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
         ),
         title: const Text(
           'Novo Treino',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 24,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 24),
         ),
       ),
       body: SingleChildScrollView(
@@ -72,19 +136,22 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
             Wrap(
               spacing: 10,
               runSpacing: 10,
-              children: ['Musculação', 'Calistenia', 'Yoga', 'Cardio'].map((
-                tipo,
-              ) {
+              children: ['Musculação', 'Calistenia', 'Yoga', 'Cardio'].map((tipo) {
                 return _buildCustomChip(
                   label: tipo,
                   isSelected: tipoTreinoSelecionado == tipo,
-                  onTap: () => setState(() => tipoTreinoSelecionado = tipo),
+                  onTap: () {
+                    setState(() {
+                      tipoTreinoSelecionado = tipo;
+                      meusExerciciosSelecionados.clear(); 
+                    });
+                  },
                 );
               }).toList(),
             ),
             const SizedBox(height: 24),
 
-            // --- Período (No seu design repete 'Tipo de Treino', mudei para Período para fazer sentido) ---
+            // --- Período ---
             _buildSectionTitle('Período do Treino'),
             Wrap(
               spacing: 10,
@@ -98,11 +165,15 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
             ),
             const SizedBox(height: 24),
 
-            // --- Calorias Gastas ---
-            _buildSectionTitle('Calorias Gastas'),
+            // --- NOVO: Data do Treino ---
+            _buildSectionTitle('Data do Treino'),
             TextField(
+              controller: _dataController,
+              readOnly: true, // Força o clique no calendário
+              onTap: () => _selecionarData(context),
               decoration: InputDecoration(
-                hintText: 'EX: 350 kcal', // Ajustado de Kg para kcal
+                hintText: 'Selecione a data',
+                suffixIcon: const Icon(Icons.calendar_today, color: Colors.black54),
                 fillColor: Colors.white,
                 filled: true,
                 border: OutlineInputBorder(
@@ -114,19 +185,78 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
                   borderSide: const BorderSide(color: Colors.black12),
                 ),
               ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- NOVO: Duração ---
+            _buildSectionTitle('Duração do Treino (Minutos)'),
+            TextField(
+              controller: _duracaoController,
               keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: 'EX: 45 min',
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- NOVO: Séries Totais ---
+            _buildSectionTitle('Séries Totais'),
+            TextField(
+              controller: _seriesController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: 'EX: 12 séries',
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- Calorias Gastas ---
+            _buildSectionTitle('Calorias Gastas Estimadas'),
+            TextField(
+              controller: _caloriasController, 
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                hintText: 'EX: 350 kcal',
+                fillColor: Colors.white,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.black12),
+                ),
+              ),
             ),
             const SizedBox(height: 24),
 
             // --- Adicionar Exercícios ---
             _buildSectionTitle('Adicione os Exercícios'),
             GestureDetector(
-              onTap: _abrirMenuDeExercicios, // Chama a função aqui!
+              onTap: _abrirMenuDeExercicios,
               child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 16,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
@@ -137,44 +267,30 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
                   children: [
                     Text(
                       meusExerciciosSelecionados.isEmpty
-                          ? 'EX: Tríceps Pulley' // Texto default
-                          : '${meusExerciciosSelecionados.length} selecionado(s)', // Mostra qtd
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.black87,
-                      ),
+                          ? 'EX: Selecionar do Catálogo'
+                          : '${meusExerciciosSelecionados.length} selecionado(s)',
+                      style: const TextStyle(fontSize: 14, color: Colors.black87),
                     ),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.black54,
-                    ),
+                    const Icon(Icons.keyboard_arrow_down, color: Colors.black54),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
             // --- Botão Salvar ---
             SizedBox(
               width: double.infinity,
               height: 56,
               child: ElevatedButton(
-                onPressed: () {
-                  // Lógica de salvar
-                },
+                onPressed: _executarSalvar, 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: corPrimaria,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                 ),
                 child: const Text(
-                  'Salvar',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  'Salvar Treino',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
               ),
             ),
@@ -185,22 +301,16 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
     );
   }
 
-  // Widget auxiliar para os títulos das seções
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
       child: Text(
         title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-          color: Colors.black87,
-        ),
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
       ),
     );
   }
 
-  // Widget auxiliar para os botões arredondados (Chips)
   Widget _buildCustomChip({
     required String label,
     required bool isSelected,
@@ -213,9 +323,7 @@ class _TreinoCadastroPageState extends State<TreinoCadastroPage> {
         decoration: BoxDecoration(
           color: isSelected ? corChipSelecionado : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? corChipSelecionado : Colors.black26,
-          ),
+          border: Border.all(color: isSelected ? corChipSelecionado : Colors.black26),
         ),
         child: Text(
           label,

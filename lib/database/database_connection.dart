@@ -2,7 +2,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'dart:async';
 
-
 class DatabaseConnection {
   static final DatabaseConnection _instance = DatabaseConnection._internal();
   Database? _db;
@@ -26,19 +25,19 @@ class DatabaseConnection {
     final basePath = await getDatabasesPath();
     final filePath = join(basePath, nameDB);
 
-    return await openDatabase (
-        filePath,
-        version: databaseVersion,
-        onConfigure: (db) async {
-          await db.execute("PRAGMA foreign_keys = ON");
-        },
-        onCreate: _onCreate,
+    return await openDatabase(
+      filePath,
+      version: databaseVersion,
+      onConfigure: (db) async {
+        await db.execute("PRAGMA foreign_keys = ON");
+      },
+      onCreate: _onCreate,
     );
   }
 
   Future<void> _onCreate(Database db, int version) async {
     final scriptsCriacao = getScriptsCriacao();
-    for(var scriptTabela in scriptsCriacao) {
+    for (var scriptTabela in scriptsCriacao) {
       await db.execute(scriptTabela);
     }
   }
@@ -100,6 +99,11 @@ class DatabaseConnection {
           done INTEGER NOT NULL DEFAULT 0,
           calories REAL,
           photo TEXT,
+          date TEXT,              
+          duration INTEGER,       
+          exercise_count INTEGER, 
+          total_series INTEGER,          -- NOVA COLUNA: Séries Totais
+          exercicios_selecionados TEXT,  -- NOVA COLUNA: Nomes dos Exercícios (JSON)
           FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE,
           FOREIGN KEY (tipo_treino_id) REFERENCES TipoTreino (id),
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
@@ -117,7 +121,5 @@ class DatabaseConnection {
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
       );""",
     ];
-
   }
-
 }

@@ -16,7 +16,11 @@ dependencies:
   sqflite: ^2.4.2+1
   path: ^1.9.1
   cloud_firestore: ^6.4.1
+<<<<<<< HEAD
   firebase_auth: ^6.5.1
+=======
+  image_picker: ^1.2.2
+>>>>>>> lucas
 
 dev_dependencies:
   flutter_test:

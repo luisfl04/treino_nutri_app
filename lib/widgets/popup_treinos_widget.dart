@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
 class SelecaoExerciciosDialog extends StatefulWidget {
-  // Recebe os exercícios que já estavam selecionados (se houver)
   final List<String> selecionadosPreviamente;
+  final String tipoTreino; // <-- NOVO: Recebe o tipo selecionado (Ex: 'Yoga')
 
   const SelecaoExerciciosDialog({
     super.key,
     this.selecionadosPreviamente = const [],
+    required this.tipoTreino, // Torna obrigatório
   });
 
   @override
@@ -14,27 +15,49 @@ class SelecaoExerciciosDialog extends StatefulWidget {
 }
 
 class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
-  // Lista que vai guardar o que o usuário marcar
   List<String> _selecionados = [];
+  List<String> _exerciciosFiltrados = []; // <-- Lista que será exibida na tela
 
-  // MOCK: Simulação de dados que viriam da sua API
-  final List<String> _exerciciosDaApi = [
-    'Tríceps Pulley',
-    'Supino Reto',
-    'Rosca Direta',
-    'Tríceps Corda',
-    'Desenvolvimento',
-    'Agachamento Livre',
-  ];
+  // MOCK FORMATADO: Agora os exercícios são separados pelo tipo exato da tela
+  final Map<String, List<String>> _exerciciosPorTipo = {
+    'Musculação': [
+      'Tríceps Pulley',
+      'Supino Reto',
+      'Rosca Direta',
+      'Tríceps Corda',
+      'Desenvolvimento',
+      'Agachamento Livre',
+    ],
+    'Calistenia': [
+      'Flexão de Braço (Push-up)',
+      'Barra Fixa (Pull-up)',
+      'Paralelas (Dips)',
+      'Abdominal Infra',
+      'Muscle-up',
+    ],
+    'Yoga': [
+      'Saudação ao Sol (Surya Namaskar)',
+      'Postura da Árvore (Vrikshasana)',
+      'Cão Olhando para Baixo',
+      'Postura do Guerreiro',
+      'Postura da Criança (Balasana)',
+    ],
+    'Cardio': [
+      'Corrida na Esteira',
+      'Pular Corda',
+      'Burpees',
+      'Polichinelos',
+      'Sprint de Bicicleta',
+    ],
+  };
 
   @override
   void initState() {
     super.initState();
-    // Inicia com os exercícios que já vieram marcados da tela anterior
     _selecionados = List.from(widget.selecionadosPreviamente);
     
-    // DICA: Se for chamar a API real, você faria isso aqui no initState 
-    // ou usaria um FutureBuilder no body do Dialog.
+    // FILTRAGEM MÁGICA: Pega apenas os exercícios do tipo escolhido
+    _exerciciosFiltrados = _exerciciosPorTipo[widget.tipoTreino] ?? [];
   }
 
   void _toggleExercicio(String exercicio, bool? value) {
@@ -58,12 +81,13 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
-          mainAxisSize: MainAxisSize.min, // O dialog se ajusta ao tamanho do conteúdo
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Selecione o Treino',
-              style: TextStyle(
+            // Exibe dinamicamente o tipo no título para o usuário ver o filtro ativo
+            Text(
+              'Exercícios de ${widget.tipoTreino}', 
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF1B1B1B),
@@ -71,33 +95,34 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
             ),
             const SizedBox(height: 24),
             
-            // Lista de exercícios com Scroll (caso a API retorne muitos)
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
-                  children: _exerciciosDaApi.map((exercicio) {
+                  // Troca a lista antiga pela lista filtrada!
+                  children: _exerciciosFiltrados.map((exercicio) {
                     final isSelected = _selecionados.contains(exercicio);
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 8.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(
-                            exercicio,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF1B1B1B),
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              exercicio,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xFF1B1B1B),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                          // Customizamos o Checkbox para ficar parecido com a imagem
                           SizedBox(
                             width: 24,
                             height: 24,
                             child: Checkbox(
                               value: isSelected,
                               onChanged: (val) => _toggleExercicio(exercicio, val),
-                              activeColor: const Color(0xFF1B1B1B),
+                              activeColor: const Color(0xFF0F7A40),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
@@ -119,46 +144,24 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 OutlinedButton(
-                  onPressed: () {
-                    // Fecha o dialog retornando null (cancelou)
-                    Navigator.pop(context); 
-                  },
+                  onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.green.shade200),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    side: BorderSide(color: Colors.grey.shade300),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  child: const Text(
-                    'Cancelar',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton(
-                  onPressed: () {
-                    // Fecha o dialog retornando a lista do que foi selecionado
-                    Navigator.pop(context, _selecionados); 
-                  },
+                  onPressed: () => Navigator.pop(context, _selecionados),
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.green.shade50, // Fundo levemente esverdeado
+                    backgroundColor: Colors.green.shade50,
                     side: BorderSide(color: Colors.green.shade200),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   ),
-                  child: const Text(
-                    'Confirmar',
-                    style: TextStyle(
-                      color: Color(0xFF1B7E3D), // Verde escuro
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text('Confirmar', style: TextStyle(color: Color(0xFF1B7E3D), fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
