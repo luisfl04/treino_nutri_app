@@ -7,12 +7,9 @@ class Treino {
   final double calorias;
   final String foto;
   final int? metaId;
-  
   final String dataTreino;
   final int duracao;
   final int qtdExercicios;
-  
-  // 👉 NOVOS CAMPOS ADICIONADOS AQUI
   final int totalSeries;
   final String exerciciosSelecionados;
 
@@ -45,8 +42,6 @@ class Treino {
       dataTreino: map['date'] ?? '',
       duracao: map['duration'] ?? 0,
       qtdExercicios: map['exercise_count'] ?? 0,
-      
-      // 👉 MAPEANDO DO BANCO DE DADOS
       totalSeries: map['total_series'] ?? 0,
       exerciciosSelecionados: map['exercicios_selecionados'] ?? '[]',
     );
@@ -65,8 +60,6 @@ class Treino {
       'date': dataTreino,
       'duration': duracao,
       'exercise_count': qtdExercicios,
-      
-      // 👉 SALVANDO NO BANCO DE DADOS
       'total_series': totalSeries,
       'exercicios_selecionados': exerciciosSelecionados,
     };
@@ -83,8 +76,6 @@ class Treino {
       'date': dataTreino,
       'duration': duracao,
       'exercise_count': qtdExercicios,
-      
-      // 👉 EXPORTANDO PARA A TELA DE DETALHES
       'total_series': totalSeries,
       'exercicios_selecionados': exerciciosSelecionados,
     };
