@@ -7,6 +7,14 @@ class Treino {
   final double calorias;
   final String foto;
   final int? metaId;
+  
+  final String dataTreino;
+  final int duracao;
+  final int qtdExercicios;
+  
+  // 👉 NOVOS CAMPOS ADICIONADOS AQUI
+  final int totalSeries;
+  final String exerciciosSelecionados;
 
   Treino({
     required this.id,
@@ -17,20 +25,30 @@ class Treino {
     required this.calorias,
     required this.foto,
     this.metaId,
+    required this.dataTreino,
+    required this.duracao,
+    required this.qtdExercicios,
+    required this.totalSeries,           // <-- Adicionado
+    required this.exerciciosSelecionados, // <-- Adicionado
   });
 
   factory Treino.fromMap(Map<String, dynamic> map) {
     return Treino(
       id: map['id'],
       usuarioId: map['usuario_id'],
-      periodoDia: map['periodo_dia'],
+      periodoDia: map['day_period'] ?? '', 
       tipoTreinoId: map['tipo_treino_id'],
-      concluido: map['concluido'] is int
-          ? map['concluido'] == 1
-          : map['concluido'] ?? false,
-      calorias: map['calorias']?.toDouble() ?? 0.0,
-      foto: map['foto'] ?? '',
+      concluido: map['done'] is int ? map['done'] == 1 : map['done'] ?? false, 
+      calorias: map['calories']?.toDouble() ?? 0.0, 
+      foto: map['photo'] ?? '', 
       metaId: map['meta_id'],
+      dataTreino: map['date'] ?? '',
+      duracao: map['duration'] ?? 0,
+      qtdExercicios: map['exercise_count'] ?? 0,
+      
+      // 👉 MAPEANDO DO BANCO DE DADOS
+      totalSeries: map['total_series'] ?? 0,
+      exerciciosSelecionados: map['exercicios_selecionados'] ?? '[]',
     );
   }
 
@@ -38,23 +56,37 @@ class Treino {
     return {
       'id': id,
       'usuario_id': usuarioId,
-      'periodo_dia': periodoDia,
       'tipo_treino_id': tipoTreinoId,
-      'concluido': concluido,
-      'calorias': calorias,
-      'foto': foto,
       'meta_id': metaId,
+      'day_period': periodoDia, 
+      'done': concluido ? 1 : 0, 
+      'calories': calorias, 
+      'photo': foto, 
+      'date': dataTreino,
+      'duration': duracao,
+      'exercise_count': qtdExercicios,
+      
+      // 👉 SALVANDO NO BANCO DE DADOS
+      'total_series': totalSeries,
+      'exercicios_selecionados': exerciciosSelecionados,
     };
   }
 
   Map<String, dynamic> toJsonPublico() {
     return {
       'id': id,
-      'periodo_dia': periodoDia,
+      'day_period': periodoDia,
       'tipo_treino_id': tipoTreinoId,
-      'concluido': concluido,
-      'calorias': calorias,
-      'foto': foto,
+      'done': concluido ? 1 : 0,
+      'calories': calorias,
+      'photo': foto,
+      'date': dataTreino,
+      'duration': duracao,
+      'exercise_count': qtdExercicios,
+      
+      // 👉 EXPORTANDO PARA A TELA DE DETALHES
+      'total_series': totalSeries,
+      'exercicios_selecionados': exerciciosSelecionados,
     };
   }
 }
