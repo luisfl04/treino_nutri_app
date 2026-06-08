@@ -1,10 +1,7 @@
+import 'dart:io'; // 👉 NOVO: Para exibir a imagem
 import 'package:flutter/material.dart';
-import 'package:sqflite/sqflite.dart'; // Import do Sqflite
+import 'package:image_picker/image_picker.dart'; // 👉 NOVO: Para abrir a galeria/câmera
 import 'package:treino_nutri_app/routes/app_routes.dart';
-
-// Importe aqui a sua classe DatabaseConnection!
-// Ajuste o caminho abaixo conforme a pasta onde você criou o arquivo database_connection.dart
-import 'package:treino_nutri_app/database/database_connection.dart';
 import 'package:treino_nutri_app/controllers/UsuarioController.dart';
 
 class CadastroPage extends StatefulWidget {
@@ -20,7 +17,6 @@ class _CadastroPageState extends State<CadastroPage> {
   late TextEditingController _senhaController;
   late TextEditingController _confirmaSenhaController;
 
-  // Novos controladores para Peso e Altura
   late TextEditingController _pesoController;
   late TextEditingController _alturaController;
 
@@ -30,8 +26,11 @@ class _CadastroPageState extends State<CadastroPage> {
 
   final UsuarioController _usuarioControllerObj = UsuarioController();
 
-  // Novo estado para controlar o botão de carregamento
   bool _isLoading = false;
+
+  // Variáveis para a foto
+  String? _fotoPath;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -55,10 +54,54 @@ class _CadastroPageState extends State<CadastroPage> {
     super.dispose();
   }
 
+  // 👉 ATUALIZADO: Função agora recebe de onde a imagem vem (câmera ou galeria)
+  Future<void> _escolherFoto(ImageSource source) async {
+    final XFile? imagem = await _picker.pickImage(source: source);
+    if (imagem != null) {
+      setState(() {
+        _fotoPath = imagem.path;
+      });
+    }
+  }
+
+  // 👉 NOVO: Menu que sobe na tela perguntando qual opção o usuário prefere
+  void _mostrarOpcoesFoto() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera, color: Color(0xFF1B7E3D)),
+                title: const Text('Tirar foto com a Câmera'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Fecha o menuzinho
+                  _escolherFoto(ImageSource.camera); // Abre a câmera
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library, color: Color(0xFF1B7E3D)),
+                title: const Text('Escolher da Galeria'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Fecha o menuzinho
+                  _escolherFoto(ImageSource.gallery); // Abre a galeria
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _handleRegister() async {
     setState(() => _isLoading = true);
 
-    // 2. Chama o Controller passando todos os dados da tela
+    // Chama o Controller passando todos os dados da tela
     String? erro = await _usuarioControllerObj.cadastrarUsuario(
       email: _emailController.text,
       usuario: _usuarioController.text,
@@ -67,12 +110,13 @@ class _CadastroPageState extends State<CadastroPage> {
       pesoStr: _pesoController.text,
       alturaStr: _alturaController.text,
       sexoSelecionado: _sexoSelecionado,
+      pathFotoPerfil: _fotoPath, // Enviando a foto para o controller
     );
 
     if (!mounted) return;
     setState(() => _isLoading = false);
 
-    // 3. Se o controller retornou um erro, mostra a mensagem vermelha
+    // Se o controller retornou um erro, mostra a mensagem vermelha
     if (erro != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(erro), backgroundColor: Colors.red),
@@ -80,7 +124,7 @@ class _CadastroPageState extends State<CadastroPage> {
       return; // Para a execução aqui
     }
 
-    // 4. Se o erro for null, deu sucesso! Mostra mensagem verde e muda de tela
+    // Se o erro for null, deu sucesso! Mostra mensagem verde e muda de tela
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
@@ -173,7 +217,7 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               const SizedBox(height: 20),
 
-              // --- NOVO: Campo Peso Atual ---
+              // Campo Peso Atual
               _buildTextField(
                 label: 'Peso Atual (kg)',
                 controller: _pesoController,
@@ -184,7 +228,7 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               const SizedBox(height: 20),
 
-              // --- NOVO: Campo Altura ---
+              // Campo Altura
               _buildTextField(
                 label: 'Altura (m)',
                 controller: _alturaController,
@@ -209,64 +253,74 @@ class _CadastroPageState extends State<CadastroPage> {
   }
 
   Widget _buildPhotoSection() {
-    return Column(
-      children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              // Imagem de placeholder com ícone
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/adicionar-foto.png',
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.contain,
-                  ),
-                ],
-              ),
-              // Ícone de + no canto inferior direito
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1B7E3D),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white, size: 24),
+    return GestureDetector(
+      onTap: _mostrarOpcoesFoto, 
+      child: Column(
+        children: [
+          Container(
+            width: 120,
+            height: 120,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-              ),
-            ],
+              ],
+              image: _fotoPath != null
+                  ? DecorationImage(
+                      image: FileImage(File(_fotoPath!)),
+                      fit: BoxFit.cover,
+                    )
+                  : null,
+            ),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Imagem de placeholder com ícone (Só mostra se a foto for nula)
+                if (_fotoPath == null) 
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/adicionar-foto.png',
+                        width: 80,
+                        height: 80,
+                        fit: BoxFit.contain,
+                      ),
+                    ],
+                  ),
+                // Ícone de + no canto inferior direito
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1B7E3D),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.add, color: Colors.white, size: 24),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'Foto',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Color(0xFF1B1B1B),
+          const SizedBox(height: 8),
+          const Text(
+            'Foto',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF1B1B1B),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -449,12 +503,10 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
-  // Botão atualizado com o indicador de carregamento
   Widget _buildRegisterButton() {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        // Desabilita o clique se estiver carregando
         onPressed: _isLoading ? null : _handleRegister,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF1B7E3D),

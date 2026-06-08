@@ -52,6 +52,7 @@ class DatabaseConnection {
           email TEXT NOT NULL UNIQUE,
           username TEXT NOT NULL UNIQUE,
           hash_senha TEXT,
+          path_foto_perfil TEXT,
           created_at TEXT NOT NULL,
           active INTEGER DEFAULT 1
       );""",
@@ -65,9 +66,12 @@ class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS Meta (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           usuario_id INTEGER NOT NULL,
-          init_date TEXT NOT NULL,
-          end_date TEXT NOT NULL,
-          percentage INTEGER NOT NULL DEFAULT 0,
+          objetivo TEXT,
+          peso_atual REAL,
+          peso_meta REAL,
+          data_inicio TEXT,
+          data_fim TEXT,
+          porcentagem INTEGER DEFAULT 0,
           FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE
       );""",
       """
