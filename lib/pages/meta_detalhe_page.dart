@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:treino_nutri_app/controllers/MetasController.dart';
 
 class MetaDetalhe extends StatelessWidget {
   const MetaDetalhe({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Dados simulados (você poderá receber isso via construtor da página)
-    const String tipoMeta = 'Emagrecimento';
-    const String dataInicio = '17/05/2026'; // NOVO CAMPO: Data de início
-    const String pesoAtual = '89 kg';
-    const String pesoAlmejado = '67 kg';
-    const String dataFinal = '17/06/2026';
+    final meta = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
 
-    // Cor de fundo padronizada das suas telas
+    final String tipoMeta = meta['objetivo'] ?? 'Sem Objetivo';
+    final String dataInicio = meta['data_inicio'] ?? '--/--/----';
+    final String dataFinal = meta['data_fim'] ?? '--/--/----';
+    final String pesoAtual = '${meta['peso_atual'] ?? 0.0} kg';
+    final String pesoAlmejado = '${meta['peso_meta'] ?? 0.0} kg';
+
     final Color corFundo = const Color(0xFFF4FAF1);
 
     return Scaffold(
@@ -27,134 +28,85 @@ class MetaDetalhe extends StatelessWidget {
         ),
         title: const Text(
           'Detalhes da Meta',
-          style: TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.w400,
-            fontSize: 20,
-          ),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400, fontSize: 20),
         ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // Alinha os itens à esquerda
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildDetailSection('Objetivo Selecionado', tipoMeta, Icons.track_changes),
             const SizedBox(height: 16),
-            
-            // Título Principal da Meta (Centralizado)
-            const Center(
-              child: Text(
-                tipoMeta,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 8),
-
-            // NOVO CAMPO: Data de Início (Centralizado)
-            const Center(
-              child: Text(
-                dataInicio,
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 40),
-            
-            // Peso Atual
-            const Text(
-              'Peso Atual',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              pesoAtual,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Peso Almejado
-            const Text(
-              'Peso Almejado',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              pesoAlmejado,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            
-            const SizedBox(height: 24),
-            
-            // Data Final
-            Text(
-              'Data final da meta',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[700],
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 4),
-            const Text(
-              dataFinal,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
+            _buildDetailSection('Data de início', dataInicio, Icons.calendar_today),
+            const SizedBox(height: 16),
+            _buildDetailSection('Peso Atual', pesoAtual, Icons.fitness_center),
+            const SizedBox(height: 16),
+            _buildDetailSection('Peso Almejado', pesoAlmejado, Icons.flag),
+            const SizedBox(height: 16),
+            _buildDetailSection('Data final da meta', dataFinal, Icons.calendar_month),
           ],
         ),
       ),
-      // NOVO CAMPO: Botão "Finalizar Meta" fixado na parte inferior
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(24.0),
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: () {
-              // Lógica para finalizar a meta
+            onPressed: () async {
+              // 👉 Chama o controller para finalizar a meta
+              final erro = await MetaController().finalizarMeta(meta['id']);
+              
+              if (erro == null) {
+                Navigator.pop(context, true); 
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('🎯 Meta concluída com orgulho!'), backgroundColor: Colors.green),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(erro), backgroundColor: Colors.red),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF0F7A34), // Cor verde do botão
+              backgroundColor: const Color(0xFF0F7A34),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(24),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
             ),
             child: const Text(
               'Finalizar Meta',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(String label, String value, IconData icon) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black12, width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF0F7A34), size: 28),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                const SizedBox(height: 4),
+                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
