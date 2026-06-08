@@ -12,6 +12,7 @@ class UsuarioController {
     required String pesoStr,
     required String alturaStr,
     required String? sexoSelecionado,
+    String? pathFotoPerfil, // 👉 NOVO: Recebe o caminho da foto da tela
   }) async {
     
     // 1. Validações básicas (Tiramos isso da Tela)
@@ -49,6 +50,7 @@ class UsuarioController {
             'hash_senha': senha, // Em produção, faça um hash da senha!
             'created_at': DateTime.now().toIso8601String(),
             'active': 1,
+            'path_foto_perfil': pathFotoPerfil ?? '', // 👉 NOVO: Salva a foto no banco (ou vazio se não tiver)
           },
           conflictAlgorithm: ConflictAlgorithm.fail,
         );
