@@ -20,29 +20,20 @@ A aplicação permitirá que o usuário cadastre, edite e acompanhe seus treinos
 - **RF06** – Registro de progresso (peso, medidas corporais, etc.)  
 - **RF07** – Definição de metas (emagrecimento, ganho de massa, etc.)  
 - **RF08** – Histórico de treinos realizados  
-- **RF09** – Histórico de alimentação  
-- **RF10** – Envio de notificações (lembretes de treino/refeição)  
-- **RF11** – Integração com API de mapas (localização de academias/rotas)  
-- **RF12** – Autenticação e armazenamento de dados via Firebase  
-- **RF13** – Upload de imagens (refeições ou progresso físico)  
-- **RF14** – Dashboard com resumo (calorias, treinos e evolução)  
+- **RF09** – Histórico de alimentação    
+- **RF10** – Upload de imagens (refeições ou progresso físico)  
+- **RF11** – Dashboard com resumo (calorias, treinos e evolução)  
 
 ## 2.3 Requisitos Não Funcionais
 
 - **RNF01** – Interface simples, intuitiva e de fácil uso  
 - **RNF02** – Aplicação leve e otimizada  
 - **RNF03** – Responsividade para diferentes tamanhos de smartphones  
-- **RNF04** – Segurança dos dados (criptografia e autenticação segura)   
-- **RNF05** – Compatibilidade com dispositivos Android  
-- **RNF06** – Escalabilidade para suportar múltiplos usuários    
-- **RNF07** – Integração eficiente com APIs externas  
 
 # 3 Tecnologias Utilizadas
 
 - Flutter  
-- Firebase (Authentication + Firestore)  
-- APIs externas (Mapas, etc.)  
-- Pacotes do Pub.dev
+- Pacotes do externos Pub.dev(Sqflite, path e etc...)
 
 # 4 Arquitetura do Sistema
 A arquitetura escolhida foi MVC (Model-View-Controller) pelo fato de ela ser perfeita para aplicações que precisam ser desenvolvidades em curto periodo de tempo. Onde ela ficou dividida como:
