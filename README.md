@@ -53,6 +53,20 @@ A arquitetura escolhida foi MVC (Model-View-Controller) pelo fato de ela ser per
 O design da aplicação foi pensado para atender os padrões atuais de design e experiencia de usuario, trazendo uma interface intuitiva e de facil uso para o usuario final, a usabilidade e experiencia do usuario foram foi uma das preucpações constante no desenvolvimento sempre buscando a facilidade de uso de cada tela.
 A ferramenta utilizada para a prototipação das telas foi o figma e os ajustes finais foram feitos no propio ambiente de desenvolvimento (Visual Studio Code), utilizando o recurso do hotreload e hotrestart para ter um feedback instantâneo dos resultados.
 
- ## Link para o figma
- 
+ ## Link para o figma 
 https://www.figma.com/proto/4o9kSenBvSDExOQGwopYwJ/Projeto-Prog.Mobile-TreinoNutri-?page-id=0%3A1&node-id=3-60&t=GTcD0eMI5wy6WwPf-0&scaling=scale-down&content-scaling=fixed
+
+# 6 Processo de Desenvolvimento
+- Baseado nos requisitos Funcionais
+- Backend: Luis
+- Telas: Vitor Lucas
+- Uso de Git e Github
+
+# 7 Conclusão e Trabalhos Futuros
+- Tendo em vista os requisitos listados, o aplicativo atende bem ao que se espera dele.
+- Algumas melhorias
+    - Migração para Armazenamento em Tempo Real
+    - Integração com APIs Externas
+    - Sincronização com Dispositivos Vestíveis (SmartWatches)
+    - Sistema de Notificações Inteligentes (Com base no comportamento diário do usuário):
+
