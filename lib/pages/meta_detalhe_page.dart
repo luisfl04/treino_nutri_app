@@ -6,7 +6,9 @@ class MetaDetalhe extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final meta = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ?? {};
+    final meta =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>? ??
+        {};
 
     final String tipoMeta = meta['objetivo'] ?? 'Sem Objetivo';
     final String dataInicio = meta['data_inicio'] ?? '--/--/----';
@@ -28,7 +30,11 @@ class MetaDetalhe extends StatelessWidget {
         ),
         title: const Text(
           'Detalhes da Meta',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400, fontSize: 20),
+          style: TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w400,
+            fontSize: 20,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -36,15 +42,27 @@ class MetaDetalhe extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailSection('Objetivo Selecionado', tipoMeta, Icons.track_changes),
+            _buildDetailSection(
+              'Objetivo Selecionado',
+              tipoMeta,
+              Icons.track_changes,
+            ),
             const SizedBox(height: 16),
-            _buildDetailSection('Data de início', dataInicio, Icons.calendar_today),
+            _buildDetailSection(
+              'Data de início',
+              dataInicio,
+              Icons.calendar_today,
+            ),
             const SizedBox(height: 16),
             _buildDetailSection('Peso Atual', pesoAtual, Icons.fitness_center),
             const SizedBox(height: 16),
             _buildDetailSection('Peso Almejado', pesoAlmejado, Icons.flag),
             const SizedBox(height: 16),
-            _buildDetailSection('Data final da meta', dataFinal, Icons.calendar_month),
+            _buildDetailSection(
+              'Data final da meta',
+              dataFinal,
+              Icons.calendar_month,
+            ),
           ],
         ),
       ),
@@ -54,13 +72,16 @@ class MetaDetalhe extends StatelessWidget {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () async {
-              // 👉 Chama o controller para finalizar a meta
+              //  Chama o controller para finalizar a meta
               final erro = await MetaController().finalizarMeta(meta['id']);
-              
+
               if (erro == null) {
-                Navigator.pop(context, true); 
+                Navigator.pop(context, true);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('🎯 Meta concluída com orgulho!'), backgroundColor: Colors.green),
+                  const SnackBar(
+                    content: Text('🎯 Meta concluída!'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -71,11 +92,17 @@ class MetaDetalhe extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0F7A34),
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
             ),
             child: const Text(
               'Finalizar Meta',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -100,9 +127,23 @@ class MetaDetalhe extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87)),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
               ],
             ),
           ),

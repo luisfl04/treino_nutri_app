@@ -14,7 +14,7 @@ class MetasPage extends StatefulWidget {
 class _MetasPageState extends State<MetasPage> {
   int _selectedIndex = 3; // Metas está selecionado
 
-  // 👉 VARIÁVEIS DE ESTADO
+  //  VARIÁVEIS DE ESTADO
   List<Map<String, dynamic>> _metas = [];
   bool _isLoading = true;
 
@@ -27,7 +27,7 @@ class _MetasPageState extends State<MetasPage> {
     _carregarMetas(); // Busca as metas assim que a tela abre
   }
 
-  // 👉 FUNÇÃO PARA BUSCAR AS METAS NO BANCO DE DADOS
+  //  FUNÇÃO PARA BUSCAR AS METAS NO BANCO DE DADOS
   Future<void> _carregarMetas() async {
     setState(() => _isLoading = true);
 
@@ -135,18 +135,18 @@ class _MetasPageState extends State<MetasPage> {
                               ); // Recarrega se voltar de lá
                         },
 
-                        // 👉 AÇÃO DE EDITAR (Passando os argumentos para a tela de cadastro se adaptar)
+                        //  AÇÃO DE EDITAR (Passando os argumentos para a tela de cadastro se adaptar)
                         onEdit: () {
                           Navigator.of(context)
                               .pushNamed(
                                 AppRoutes
-                                    .editarMeta, // 👈 NOME DA ROTA ATUALIZADO AQUI
+                                    .editarMeta, 
                                 arguments: meta,
                               )
                               .then((_) => _carregarMetas());
                         },
 
-                        // 👉 EXCLUSÃO COM CONFIRMAÇÃO DE VERDADE
+                        //  EXCLUSÃO COM CONFIRMAÇÃO DE VERDADE
                         onDelete: () {
                           showDialog(
                             context: context,
@@ -212,7 +212,7 @@ class _MetasPageState extends State<MetasPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 👉 O .then() garante que a lista atualize após o cadastro!
+                    //  O .then() garante que a lista atualize após o cadastro!
                     Navigator.of(
                       context,
                     ).pushNamed(AppRoutes.metaCadasrto).then((_) {
