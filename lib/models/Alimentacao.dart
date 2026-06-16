@@ -1,33 +1,34 @@
 class Alimentacao {
-  final int id;
+  final int? id;
   final int usuarioId;
   final String tipoRefeicao;
+  final String descricao; 
   final bool concluida;
   final double valorCalorico;
   final String foto;
-  final int? metaId;       
+  final String dataCriacao; 
 
   Alimentacao({
-    required this.id,
+    this.id,
     required this.usuarioId,
     required this.tipoRefeicao,
+    required this.descricao,
     required this.concluida,
     required this.valorCalorico,
     required this.foto,
-    this.metaId,
+    required this.dataCriacao,
   });
 
   factory Alimentacao.fromMap(Map<String, dynamic> map) {
     return Alimentacao(
       id: map['id'],
       usuarioId: map['usuario_id'],
-      tipoRefeicao: map['tipo_refeicao'],
-      concluida: map['concluida'] is int
-          ? map['concluida'] == 1
-          : map['concluida'] ?? false,
+      tipoRefeicao: map['tipo_refeicao'] ?? '',
+      descricao: map['descricao'] ?? '',
+      concluida: map['concluida'] == 1,
       valorCalorico: map['valor_calorico']?.toDouble() ?? 0.0,
       foto: map['foto'] ?? '',
-      metaId: map['meta_id'],
+      dataCriacao: map['data_criacao'] ?? DateTime.now().toIso8601String(),
     );
   }
 
@@ -36,20 +37,11 @@ class Alimentacao {
       'id': id,
       'usuario_id': usuarioId,
       'tipo_refeicao': tipoRefeicao,
-      'concluida': concluida,
+      'descricao': descricao,
+      'concluida': concluida ? 1 : 0,
       'valor_calorico': valorCalorico,
       'foto': foto,
-      'meta_id': metaId,
-    };
-  }
-
-  Map<String, dynamic> toJsonPublico() {
-    return {
-      'id': id,
-      'tipo_refeicao': tipoRefeicao,
-      'concluida': concluida,
-      'valor_calorico': valorCalorico,
-      'foto': foto,
+      'data_criacao': dataCriacao,
     };
   }
 }

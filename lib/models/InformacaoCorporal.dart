@@ -1,6 +1,6 @@
 class InformacaoCorporal {
   final int id;
-  final int usuarioId; // Chave Estrangeira (FK)
+  final int usuarioId; 
   final double peso;
   final double altura;
 

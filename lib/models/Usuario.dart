@@ -1,5 +1,5 @@
 class Usuario {
-  final String? uuid;
+  final int? id;
   final String nome;
   final String username;
   final String? hash_senha;
@@ -11,7 +11,7 @@ class Usuario {
   final bool? ativo;
 
   Usuario({
-    this.uuid,
+    this.id,
     required this.nome,
     required this.username,
     this.hash_senha,
@@ -34,7 +34,7 @@ class Usuario {
     }
 
     return Usuario(
-      uuid: usuario_map['uuid'],
+      id: usuario_map['id'],
       // Proteção contra nulos com fallbacks (?? '')
       nome: usuario_map['nome'] ?? '',
       username: usuario_map['username'] ?? usuario_map['usuario'] ?? '',
@@ -55,7 +55,7 @@ class Usuario {
   // O toMap é o Porteiro do Banco de Dados.
   Map<String, dynamic> toMap() {
     return {
-      'uuid': uuid,
+      'id': id,
       'nome': nome,
       'username': username,
       'hash_senha': hash_senha ?? '', // Evita enviar nulo para o banco
@@ -72,7 +72,7 @@ class Usuario {
 
   Map<String, dynamic> toPublicJson() {
     return {
-      'uuid': uuid,
+      'id': id,
       'nome': nome,
       'username': username,
       // Datas devem ir como String no JSON também
