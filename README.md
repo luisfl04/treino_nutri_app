@@ -36,17 +36,17 @@ A aplicação permitirá que o usuário cadastre, edite e acompanhe seus treinos
 # 4 Arquitetura do Sistema
 A arquitetura escolhida foi MVC (Model-View-Controller) pelo fato de ela ser perfeita para aplicações que precisam ser desenvolvidades em curto periodo de tempo. Onde ela ficou dividida como:
 
-  - Pages A camada de visualização das interfaces de usuario
+  - **Pages:** A camada de visualização das interfaces de usuario
     
-  - Controllers Responsáveis por controlar o fluxo da aplicação, recebendo as ações do usuário, processando as regras de negócio e realizando      a comunicação entre as Pages e os Models.
+  - **Controllers:** Responsáveis por controlar o fluxo da aplicação, recebendo as ações do usuário, processando as regras de negócio e realizando      a comunicação entre as Pages e os Models.
     
-  - Models (Responsáveis por representar e estruturar os dados da aplicação, contendo os atributos e regras relacionadas às entidades do           sistema.
+  - **Models:** (Responsáveis por representar e estruturar os dados da aplicação, contendo os atributos e regras relacionadas às entidades do           sistema.
     
-  - Repositories Camada responsável pelo acesso e manipulação dos dados, realizando operações como cadastro, consulta, atualização e remoção       no banco de dados.
+  - **Repositories:** Camada responsável pelo acesso e manipulação dos dados, realizando operações como cadastro, consulta, atualização e remoção       no banco de dados.
     
-  - DataBase Responsável pelo armazenamento persistente das informações da aplicação, garantindo organização, integridade e recuperação dos        dado.
+  - **DataBase** Responsável pelo armazenamento persistente das informações da aplicação, garantindo organização, integridade e recuperação dos        dado.
     
-  - Widgets Componentes reutilizáveis da interface gráfica utilizados para construir telas de forma modular, organizada e padronizada.
+  - **Widgets** Componentes reutilizáveis da interface gráfica utilizados para construir telas de forma modular, organizada e padronizada.
 
 # 5 Design de Interface (UI/UX)
 
