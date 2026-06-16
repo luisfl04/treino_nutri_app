@@ -48,13 +48,15 @@ class DatabaseConnection {
       CREATE TABLE IF NOT EXISTS Usuario (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           uuid TEXT UNIQUE,
-          name TEXT NOT NULL,
+          nome TEXT NOT NULL,            
           email TEXT NOT NULL UNIQUE,
           username TEXT NOT NULL UNIQUE,
           hash_senha TEXT,
           path_foto_perfil TEXT,
-          created_at TEXT NOT NULL,
-          active INTEGER DEFAULT 1
+          sexo TEXT,                      
+          data_nascimento TEXT,           
+          data_criacao TEXT NOT NULL,     
+          ativo INTEGER DEFAULT 1         
       );""",
       """
       CREATE TABLE IF NOT EXISTS TipoTreino (
@@ -63,7 +65,7 @@ class DatabaseConnection {
           description TEXT NOT NULL
       );""",
       """
-      CREATE TABLE IF NOT EXISTS Meta (
+     CREATE TABLE IF NOT EXISTS Meta (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           usuario_id INTEGER NOT NULL,
           objetivo TEXT,
@@ -106,8 +108,9 @@ class DatabaseConnection {
           date TEXT,              
           duration INTEGER,       
           exercise_count INTEGER, 
-          total_series INTEGER,          -- NOVA COLUNA: Séries Totais
-          exercicios_selecionados TEXT,  -- NOVA COLUNA: Nomes dos Exercícios (JSON)
+          total_series INTEGER,          
+          exercicios_selecionados TEXT,  
+          description TEXT,      
           FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE,
           FOREIGN KEY (tipo_treino_id) REFERENCES TipoTreino (id),
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
@@ -117,10 +120,12 @@ class DatabaseConnection {
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           usuario_id INTEGER NOT NULL,
           meta_id INTEGER,
-          snack_type TEXT NOT NULL,
-          done INTEGER NOT NULL DEFAULT 0,
-          caloric_value REAL,
-          photo TEXT,
+          tipo_refeicao TEXT NOT NULL,    
+          descricao TEXT NOT NULL,        
+          concluida INTEGER NOT NULL DEFAULT 0, 
+          valor_calorico REAL,            
+          foto TEXT,
+          data_criacao TEXT NOT NULL,    
           FOREIGN KEY (usuario_id) REFERENCES Usuario (id) ON DELETE CASCADE,
           FOREIGN KEY (meta_id) REFERENCES Meta (id) ON DELETE SET NULL
       );""",
