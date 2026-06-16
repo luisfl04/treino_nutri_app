@@ -12,18 +12,85 @@ class TreinosPage extends StatefulWidget {
 }
 
 class _TreinosPageState extends State<TreinosPage> {
-  int _selectedIndex = 1; // Treinos está selecionado
+  int _selectedIndex = 1;
 
   List<Map<String, dynamic>> _treinos = [];
   bool _isLoading = true;
 
-  // Instância do Controller
   final TreinoController _treinoController = TreinoController();
 
   @override
   void initState() {
     super.initState();
     _carregarTreinos();
+  }
+
+  Future<void> _confirmarExclusao(int treinoId) async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Excluir Treino',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            'Tem a certeza que deseja excluir este treino? Esta ação não pode ser desfeita.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () async {
+                Navigator.pop(context); // Fecha o pop-up primeiro
+
+                // Chama a função do controller para apagar do banco
+                bool sucesso = await _treinoController.excluirTreino(treinoId);
+
+                if (sucesso && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Treino excluído com sucesso!'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  //  Atualiza a tela recarregando os treinos do banco
+                  _carregarTreinos();
+                } else if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Erro ao excluir o treino.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text(
+                'Excluir',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Função que pede os dados para o Controller e atualiza o estado
@@ -103,48 +170,60 @@ class _TreinosPageState extends State<TreinosPage> {
                     final treino = _treinos[index];
 
                     // --- variáveis seguras ---
+                    int idTreino =
+                        treino['id'] ?? 0; // ID do treino para edição/exclusão
                     String nomeTreino = treino['tipo_nome'] ?? 'Treino';
-                    String periodo = 'Período: ${treino['day_period'] ?? 'Não informado'}';
-                    String calorias = '${treino['calories']?.toInt() ?? 0} kcal';
+                    String periodo =
+                        'Período: ${treino['day_period'] ?? 'Não informado'}';
+                    String calorias =
+                        '${treino['calories']?.toInt() ?? 0} kcal';
                     bool concluido = treino['done'] == 1;
-                    String dataBanco = treino['date'] != null && treino['date'].toString().isNotEmpty 
-                        ? treino['date'] 
+                    String dataBanco =
+                        treino['date'] != null &&
+                            treino['date'].toString().isNotEmpty
+                        ? treino['date']
                         : 'Sem data';
-                    
-                    // 2. Juntamos a data com o status quebrando a linha (\n)
-                    String textoDataStatus = concluido 
-                        ? '$dataBanco\n✔ Concluído' 
+
+                    // 2.  quebran de linha (\n)
+                    String textoDataStatus = concluido
+                        ? '$dataBanco\n✔ Concluído'
                         : '$dataBanco\nEm andamento';
 
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16.0),
                       child: Opacity(
-                        opacity: concluido ? 0.5 : 1.0, 
+                        opacity: concluido ? 0.5 : 1.0,
                         child: TreinoCardWidget(
                           onTap: () async {
-                            final atualizou = await Navigator.of(context).pushNamed(
+                            final atualizou = await Navigator.of(context)
+                                .pushNamed(
                                   AppRoutes.treinoDetalhe,
                                   arguments: treino,
                                 );
 
                             if (atualizou == true) {
-                              _carregarTreinos(); 
+                              _carregarTreinos();
                             }
                           },
                           nome: nomeTreino,
                           exercicios: periodo,
                           duracao: calorias,
-                          data: textoDataStatus, 
+                          data: textoDataStatus,
                           onEdit: () {
-                            Navigator.of(context).pushNamed(AppRoutes.editarTreino);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Editar')),
-                            );
+                            // Envia os dados do treino para a tela de edição
+                            Navigator.of(context)
+                                .pushNamed(
+                                  AppRoutes.editarTreino,
+                                  arguments: treino,
+                                )
+                                .then((value) {
+                                  // Atualiza a lista quando voltar da edição
+                                  _carregarTreinos();
+                                });
                           },
+                          //  CHAMA O MÉTODO DE EXCLUSÃO AQUI, PASSANDO O ID
                           onDelete: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Excluir')),
-                            );
+                            _confirmarExclusao(idTreino);
                           },
                         ),
                       ),
@@ -159,7 +238,9 @@ class _TreinosPageState extends State<TreinosPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamed(AppRoutes.treinoCadastro).then((_) {
+                    Navigator.of(
+                      context,
+                    ).pushNamed(AppRoutes.treinoCadastro).then((_) {
                       _carregarTreinos();
                     });
                   },
