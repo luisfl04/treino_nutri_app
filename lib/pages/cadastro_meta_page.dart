@@ -10,15 +10,15 @@ class CadastrarMetaPage extends StatefulWidget {
 
 class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
   String objetivoSelecionado = 'Ganho de Massa';
-  
+
   final TextEditingController pesoAtualController = TextEditingController();
   final TextEditingController pesoMetaController = TextEditingController();
   final TextEditingController dataInicioController = TextEditingController();
   final TextEditingController dataFinalController = TextEditingController();
 
-  final Color corFundo = const Color(0xFFF4FAF1); 
-  final Color corPrimaria = const Color(0xFF0F7A40); 
-  final Color corChipSelecionado = const Color(0xFF28C25E); 
+  final Color corFundo = const Color(0xFFF4FAF1);
+  final Color corPrimaria = const Color(0xFF0F7A40);
+  final Color corChipSelecionado = const Color(0xFF28C25E);
 
   final MetaController _metaController = MetaController();
   bool _isLoading = false;
@@ -30,12 +30,13 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_isInitialized) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
       if (args != null && args.isNotEmpty) {
         _isEditMode = true;
         _metaId = args['id'];
-        
+
         objetivoSelecionado = args['objetivo'] ?? 'Ganho de Massa';
         pesoAtualController.text = args['peso_atual']?.toString() ?? '';
         pesoMetaController.text = args['peso_meta']?.toString() ?? '';
@@ -58,7 +59,10 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
   Future<void> _salvarMeta() async {
     if (pesoAtualController.text.isEmpty || pesoMetaController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preencha os pesos para continuar.'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Preencha os pesos para continuar.'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
@@ -90,8 +94,12 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
     if (erro == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(_isEditMode ? '🎯 Meta atualizada com sucesso!' : '🎯 Meta cadastrada com sucesso!'), 
-          backgroundColor: Colors.green
+          content: Text(
+            _isEditMode
+                ? '🎯 Meta atualizada com sucesso!'
+                : '🎯 Meta cadastrada com sucesso!',
+          ),
+          backgroundColor: Colors.green,
         ),
       );
       Navigator.of(context).pop(true);
@@ -102,8 +110,11 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
     }
   }
 
-  // 👉 Abre o Calendário Nativo
-  Future<void> _selecionarData(BuildContext context, TextEditingController controller) async {
+  //  Abre o Calendário Nativo
+  Future<void> _selecionarData(
+    BuildContext context,
+    TextEditingController controller,
+  ) async {
     final DateTime? dataSelecionada = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
@@ -112,7 +123,11 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(primary: corPrimaria, onPrimary: Colors.white, onSurface: Colors.black),
+            colorScheme: ColorScheme.light(
+              primary: corPrimaria,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
           ),
           child: child!,
         );
@@ -143,7 +158,11 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
         ),
         title: Text(
           _isEditMode ? 'Editar Meta' : 'Nova Meta',
-          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.w400, fontSize: 20),
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.w400,
+            fontSize: 20,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -151,15 +170,33 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Objetivo', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Objetivo',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                _buildCustomChip(label: 'Emagrecimento', isSelected: objetivoSelecionado == 'Emagrecimento', onTap: () => setState(() => objetivoSelecionado = 'Emagrecimento')),
-                _buildCustomChip(label: 'Ganho de Massa', isSelected: objetivoSelecionado == 'Ganho de Massa', onTap: () => setState(() => objetivoSelecionado = 'Ganho de Massa')),
-                _buildCustomChip(label: 'Manutenção', isSelected: objetivoSelecionado == 'Manutenção', onTap: () => setState(() => objetivoSelecionado = 'Manutenção')),
+                _buildCustomChip(
+                  label: 'Emagrecimento',
+                  isSelected: objetivoSelecionado == 'Emagrecimento',
+                  onTap: () =>
+                      setState(() => objetivoSelecionado = 'Emagrecimento'),
+                ),
+                _buildCustomChip(
+                  label: 'Ganho de Massa',
+                  isSelected: objetivoSelecionado == 'Ganho de Massa',
+                  onTap: () =>
+                      setState(() => objetivoSelecionado = 'Ganho de Massa'),
+                ),
+                _buildCustomChip(
+                  label: 'Manutenção',
+                  isSelected: objetivoSelecionado == 'Manutenção',
+                  onTap: () =>
+                      setState(() => objetivoSelecionado = 'Manutenção'),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -169,9 +206,19 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Peso Atual', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text(
+                        'Peso Atual',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      _buildTextField(pesoAtualController, 'Ex: 80', TextInputType.number),
+                      _buildTextField(
+                        pesoAtualController,
+                        'Ex: 80',
+                        TextInputType.number,
+                      ),
                     ],
                   ),
                 ),
@@ -180,24 +227,46 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Peso Almejado', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      const Text(
+                        'Peso Almejado',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                       const SizedBox(height: 8),
-                      _buildTextField(pesoMetaController, 'Ex: 75', TextInputType.number),
+                      _buildTextField(
+                        pesoMetaController,
+                        'Ex: 75',
+                        TextInputType.number,
+                      ),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const Text('Data de início', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Data de início',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 8),
-            _buildDateField(dataInicioController, 'Selecione a data'), // 👈 Usando o novo campo
+            _buildDateField(
+              dataInicioController,
+              'Selecione a data',
+            ), 
             const SizedBox(height: 24),
-            const Text('Data final da meta', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Data final da meta',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 8),
-            _buildDateField(dataFinalController, 'Selecione a data'), // 👈 Usando o novo campo
+            _buildDateField(
+              dataFinalController,
+              'Selecione a data',
+            ), 
             const SizedBox(height: 40),
-            
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -206,13 +275,19 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
                   backgroundColor: corPrimaria,
                   disabledBackgroundColor: Colors.grey,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
                 ),
-                child: _isLoading 
+                child: _isLoading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : Text(
                         _isEditMode ? 'Atualizar Meta' : 'Salvar Meta',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
               ),
             ),
@@ -223,7 +298,11 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hint, TextInputType type) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String hint,
+    TextInputType type,
+  ) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
@@ -231,20 +310,32 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
         hintStyle: const TextStyle(color: Colors.grey),
         fillColor: Colors.white,
         filled: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: corPrimaria)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: corPrimaria),
+        ),
       ),
       keyboardType: type,
     );
   }
 
-  // 👉 Widget exclusivo para pegar data (Bloqueia teclado e mostra o ícone)
+  //  Widget exclusivo para pegar data (Bloqueia teclado e mostra o ícone)
   Widget _buildDateField(TextEditingController controller, String hint) {
     return TextField(
       controller: controller,
-      readOnly: true, 
+      readOnly: true,
       onTap: () => _selecionarData(context, controller),
       decoration: InputDecoration(
         hintText: hint,
@@ -252,15 +343,31 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
         fillColor: Colors.white,
         filled: true,
         suffixIcon: const Icon(Icons.calendar_month, color: Colors.grey),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: Colors.black12)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: corPrimaria)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.black12),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: corPrimaria),
+        ),
       ),
     );
   }
 
-  Widget _buildCustomChip({required String label, required bool isSelected, required VoidCallback onTap}) {
+  Widget _buildCustomChip({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -268,11 +375,16 @@ class _CadastrarMetaPageState extends State<CadastrarMetaPage> {
         decoration: BoxDecoration(
           color: isSelected ? corChipSelecionado : Colors.white,
           borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: isSelected ? corChipSelecionado : Colors.black26),
+          border: Border.all(
+            color: isSelected ? corChipSelecionado : Colors.black26,
+          ),
         ),
         child: Text(
           label,
-          style: TextStyle(color: isSelected ? Colors.white : Colors.black54, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal),
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.black54,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+          ),
         ),
       ),
     );

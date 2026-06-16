@@ -1,8 +1,11 @@
-import 'dart:io'; // 👉 NOVO: Para exibir a imagem
+import 'dart:io'; 
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // 👉 NOVO: Para abrir a galeria/câmera
+import 'package:image_picker/image_picker.dart'; 
+import 'package:path_provider/path_provider.dart'; // 👉 IMPORT NOVO: Para a pasta forte (permanente)
 import 'package:treino_nutri_app/routes/app_routes.dart';
 import 'package:treino_nutri_app/controllers/UsuarioController.dart';
+import 'package:treino_nutri_app/controllers/AuthController.dart';
+import 'package:treino_nutri_app/models/Usuario.dart';
 
 class CadastroPage extends StatefulWidget {
   const CadastroPage({super.key});
@@ -54,17 +57,28 @@ class _CadastroPageState extends State<CadastroPage> {
     super.dispose();
   }
 
-  // 👉 ATUALIZADO: Função agora recebe de onde a imagem vem (câmera ou galeria)
+  // 👉 ATUALIZADO: Salva a foto na pasta PERMANENTE do Android/iOS
   Future<void> _escolherFoto(ImageSource source) async {
     final XFile? imagem = await _picker.pickImage(source: source);
     if (imagem != null) {
+      // 1. Encontra a pasta "Forte" do telemóvel que o sistema não apaga
+      final directory = await getApplicationDocumentsDirectory();
+      
+      // 2. Cria um nome único usando a data e hora atual
+      final nomeArquivo = '${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final caminhoPermanente = '${directory.path}/$nomeArquivo';
+      
+      // 3. Copia da pasta temporária (que some) para a permanente (que fica)
+      final File arquivoTemp = File(imagem.path);
+      final File arquivoSalvo = await arquivoTemp.copy(caminhoPermanente);
+
       setState(() {
-        _fotoPath = imagem.path;
+        _fotoPath = arquivoSalvo.path; // Guarda o caminho definitivo!
       });
     }
   }
 
-  // 👉 NOVO: Menu que sobe na tela perguntando qual opção o usuário prefere
+  // Menu que sobe na tela perguntando qual opção o usuário prefere
   void _mostrarOpcoesFoto() {
     showModalBottomSheet(
       context: context,
@@ -79,16 +93,16 @@ class _CadastroPageState extends State<CadastroPage> {
                 leading: const Icon(Icons.photo_camera, color: Color(0xFF1B7E3D)),
                 title: const Text('Tirar foto com a Câmera'),
                 onTap: () {
-                  Navigator.of(context).pop(); // Fecha o menuzinho
-                  _escolherFoto(ImageSource.camera); // Abre a câmera
+                  Navigator.of(context).pop(); 
+                  _escolherFoto(ImageSource.camera); 
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.photo_library, color: Color(0xFF1B7E3D)),
                 title: const Text('Escolher da Galeria'),
                 onTap: () {
-                  Navigator.of(context).pop(); // Fecha o menuzinho
-                  _escolherFoto(ImageSource.gallery); // Abre a galeria
+                  Navigator.of(context).pop(); 
+                  _escolherFoto(ImageSource.gallery); 
                 },
               ),
             ],
@@ -98,43 +112,71 @@ class _CadastroPageState extends State<CadastroPage> {
     );
   }
 
+  // Lógica de Cadastro e Login automático
   Future<void> _handleRegister() async {
     setState(() => _isLoading = true);
 
-    // Chama o Controller passando todos os dados da tela
-    String? erro = await _usuarioControllerObj.cadastrarUsuario(
-      email: _emailController.text,
-      usuario: _usuarioController.text,
-      senha: _senhaController.text,
-      confirmaSenha: _confirmaSenhaController.text,
-      pesoStr: _pesoController.text,
-      alturaStr: _alturaController.text,
-      sexoSelecionado: _sexoSelecionado,
-      pathFotoPerfil: _fotoPath, // Enviando a foto para o controller
-    );
-
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-
-    // Se o controller retornou um erro, mostra a mensagem vermelha
-    if (erro != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(erro), backgroundColor: Colors.red),
+    try {
+      // 1. Chama o Controller para cadastrar os dados no banco
+      String? erro = await _usuarioControllerObj.cadastrarUsuario(
+        email: _emailController.text,
+        usuario: _usuarioController.text,
+        senha: _senhaController.text,
+        confirmaSenha: _confirmaSenhaController.text,
+        pesoStr: _pesoController.text,
+        alturaStr: _alturaController.text,
+        sexoSelecionado: _sexoSelecionado,
+        pathFotoPerfil: _fotoPath, // Enviando a foto para o controller
       );
-      return; // Para a execução aqui
-    }
 
-    // Se o erro for null, deu sucesso! Mostra mensagem verde e muda de tela
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Cadastro realizado com sucesso, ${_usuarioController.text}!',
+      // Se o controller retornou um erro, mostra a mensagem vermelha
+      if (erro != null) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(erro), backgroundColor: Colors.red),
+        );
+        setState(() => _isLoading = false);
+        return; 
+      }
+
+      // 2. Faz o Login Automático após o cadastro dar sucesso
+      final AuthController authController = AuthController();
+      Usuario usuarioCadastrado = await authController.entrar(
+        login: _usuarioController.text,
+        senha: _senhaController.text,
+      );
+
+      // 3. Salva a sessão na memória global
+      AuthController.usuarioLogado = usuarioCadastrado;
+
+      if (!mounted) return;
+
+      // 4. Mostra mensagem de sucesso
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Cadastro realizado com sucesso, ${_usuarioController.text}!',
+          ),
+          backgroundColor: Colors.green,
         ),
-        backgroundColor: Colors.green,
-      ),
-    );
+      );
 
-    Navigator.of(context).pushReplacementNamed(AppRoutes.home);
+      // 5. Vai para a Home limpando todas as telas anteriores
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppRoutes.home,
+        (Route<dynamic> route) => false,
+      );
+
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -280,7 +322,6 @@ class _CadastroPageState extends State<CadastroPage> {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Imagem de placeholder com ícone (Só mostra se a foto for nula)
                 if (_fotoPath == null) 
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -293,7 +334,6 @@ class _CadastroPageState extends State<CadastroPage> {
                       ),
                     ],
                   ),
-                // Ícone de + no canto inferior direito
                 Positioned(
                   bottom: 0,
                   right: 0,
