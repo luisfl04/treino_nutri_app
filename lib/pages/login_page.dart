@@ -15,9 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController _senhaController;
 
   bool _obscurePassword = true;
-  bool _isLoading = false; // Novo: Controle de carregamento
+  bool _isLoading = false; 
 
-  // Novo: Instanciando o seu Controller
   final AuthController _authController = AuthController();
 
   @override
@@ -35,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    setState(() => _isLoading = true); // Se você tiver o loading
+    setState(() => _isLoading = true); 
 
     try {
       // 1. Tenta fazer o login. Se der sucesso, recebe o Usuario.
@@ -82,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Nome de Usuário ou E-mail', // Atualizei a label para ficar mais claro
+                  'Nome de Usuário ou E-mail',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,

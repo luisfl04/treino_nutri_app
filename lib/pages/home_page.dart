@@ -1,9 +1,11 @@
-import 'dart:io'; // 👉 IMPORTANTE: Necessário para ler o arquivo da foto do celular!
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:treino_nutri_app/routes/app_routes.dart';
 import 'package:treino_nutri_app/widgets/bottom_navigation_widget.dart';
-import 'package:treino_nutri_app/models/Usuario.dart'; 
-import 'package:treino_nutri_app/widgets/metas_carousel_widget.dart'; 
+import 'package:treino_nutri_app/models/Usuario.dart';
+import 'package:treino_nutri_app/widgets/metas_carousel_widget.dart';
+import 'package:treino_nutri_app/controllers/AuthController.dart';
+import 'package:treino_nutri_app/controllers/MetasController.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -14,9 +16,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  bool _isLoading = true;
 
-  void _fazerLogout() {
-    // Retorna para o login destruindo as telas anteriores
+  final MetaController _metaController = MetaController();
+  List<Map<String, dynamic>> _minhasMetas = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _verificarSessao();
+  }
+
+  Future<void> _verificarSessao() async {
+    await AuthController.recuperarSessao();
+    await _carregarMetasReal(); // Busca as metas no SQLite
+    if (mounted) {
+      setState(() {
+        _isLoading = false; // Retira o loading da tela
+      });
+    }
+  }
+
+  // Busca as metas
+  Future<void> _carregarMetasReal() async {
+    final metasDoBanco = await _metaController
+        .buscarMetas(); 
+    if (mounted) {
+      setState(() {
+        _minhasMetas = metasDoBanco;
+      });
+    }
+  }
+
+  void _fazerLogout() async {
+    await AuthController.sair();
+
+    if (!mounted) return;
     Navigator.of(
       context,
     ).pushNamedAndRemoveUntil(AppRoutes.login, (Route<dynamic> route) => false);
@@ -24,16 +59,23 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // 1. RECEBE O USUÁRIO QUE VEIO DA TELA DE LOGIN
-    final Usuario? usuarioLogado =
-        ModalRoute.of(context)?.settings.arguments as Usuario?;
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFFF5F5F5),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF1B7E3D)),
+        ),
+      );
+    }
 
-    // 2. Pega o nome. Se por algum motivo for nulo, chama de 'Visitante'
+    final Usuario? usuarioLogado = AuthController.usuarioLogado;
     final String nomeExibir = usuarioLogado?.nome ?? 'Visitante';
+    final String? caminhoFoto = usuarioLogado?.path_foto_perfil?.trim();
 
-    // 👉 NOVO: Lógica para verificar se o usuário tem uma foto salva no banco
-    final String? caminhoFoto = usuarioLogado?.path_foto_perfil;
-    final bool temFoto = caminhoFoto != null && caminhoFoto.isNotEmpty;
+    final bool temFoto =
+        caminhoFoto != null &&
+        caminhoFoto.isNotEmpty &&
+        File(caminhoFoto).existsSync();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
@@ -43,7 +85,7 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- SEÇÃO DE BOAS VINDAS ---
+              // --- SEÇÃO DE PERFIL ---
               Row(
                 children: [
                   Container(
@@ -56,7 +98,6 @@ class _HomePageState extends State<HomePage> {
                         width: 2,
                       ),
                       color: Colors.grey[300],
-                      // 👉 CORREÇÃO: Usa FileImage se a foto existir. Se não, fica nulo.
                       image: temFoto
                           ? DecorationImage(
                               image: FileImage(File(caminhoFoto)),
@@ -64,7 +105,6 @@ class _HomePageState extends State<HomePage> {
                             )
                           : null,
                     ),
-                    // 👉 CORREÇÃO: O Icon entra como "child" apenas se não houver foto.
                     child: temFoto
                         ? null
                         : const Icon(
@@ -74,7 +114,6 @@ class _HomePageState extends State<HomePage> {
                           ),
                   ),
                   const SizedBox(width: 12),
-                  // Texto de boas-vindas
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +129,6 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                   ),
-                  // Botão de Logout
                   IconButton(
                     onPressed: _fazerLogout,
                     icon: const Icon(
@@ -104,26 +142,29 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 32),
 
-              // --- SEÇÃO DE METAS (CARROSSEL DINÂMICO) ---
-              const Text(
-                'Minhas Metas',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1B1B1B),
+              //  Condição: A seção e o Carrossel só aparecem se houverem metas salvas no banco
+              if (_minhasMetas.isNotEmpty) ...[
+                const Text(
+                  'Minhas Metas',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1B1B1B),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+                // UniqueKey força o carrossel a redesenhar-se do zero após alterações nas metas
+                MetasCarouselWidget(key: UniqueKey()),
+                const SizedBox(height: 24),
+              ],
 
-              // 👉 CHAMAMOS O CARROSSEL AQUI (ele faz tudo sozinho!)
-              const MetasCarouselWidget(),
-
-              const SizedBox(height: 24),
-
-              // --- CARDS DE NAVEGAÇÃO ---
-              // Card Treinos
+              // --- SEÇÃO DE BOTÕES ---
               GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed(AppRoutes.treinos),
+                onTap: () {
+                  Navigator.of(context).pushNamed(AppRoutes.treinos).then((_) {
+                    _carregarMetasReal(); // Recarrega se o treino atualizar a meta
+                  });
+                },
                 child: _buildActionCard(
                   'Treinos',
                   Icons.fitness_center,
@@ -131,10 +172,14 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Card Alimentação
               GestureDetector(
-                onTap: () =>
-                    Navigator.of(context).pushNamed(AppRoutes.alimentacao),
+                onTap: () {
+                  Navigator.of(context).pushNamed(AppRoutes.alimentacao).then((
+                    _,
+                  ) {
+                    _carregarMetasReal();
+                  });
+                },
                 child: _buildActionCard(
                   'Alimentação',
                   Icons.restaurant,
@@ -142,9 +187,13 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
               const SizedBox(height: 12),
-              // Card Metas (Abre a lista completa)
               GestureDetector(
-                onTap: () => Navigator.of(context).pushNamed(AppRoutes.metas),
+                onTap: () {
+                  // Ao voltar da tela de gerenciar metas, recarrega o estado atualizado do banco
+                  Navigator.of(context).pushNamed(AppRoutes.metas).then((_) {
+                    _carregarMetasReal();
+                  });
+                },
                 child: _buildActionCard(
                   'Gerenciar Metas',
                   Icons.show_chart,
