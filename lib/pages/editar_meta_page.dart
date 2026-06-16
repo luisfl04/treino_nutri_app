@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:treino_nutri_app/controllers/MetasController.dart'; // 👉 IMPORTAMOS O CONTROLLER
+import 'package:treino_nutri_app/controllers/MetasController.dart';
 
 class EditarMetaPage extends StatefulWidget {
   const EditarMetaPage({super.key});
@@ -17,11 +17,9 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
   final Color corFundo = const Color(0xFFF4FAF1);
   final Color corPrimaria = const Color(0xFF0F7A40);
 
-  // Instância do controller
   final MetaController _metaController = MetaController();
   bool _isLoading = false;
 
-  // Variáveis para guardar os dados originais que não aparecem nessa tela
   int? _metaId;
   String _dataInicioOriginal = '';
   bool _isInitialized = false;
@@ -40,12 +38,13 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
     super.didChangeDependencies();
     // 👉 CAPTURAMOS OS DADOS VINDOS DA TELA ANTERIOR
     if (!_isInitialized) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
       if (args != null) {
         _metaId = args['id'];
-        _dataInicioOriginal = args['data_inicio'] ?? ''; // Guarda para não perder ao salvar
-        
+        _dataInicioOriginal = args['data_inicio'] ?? '';
+
         tipoMetaController.text = args['objetivo'] ?? '';
         pesoAtualController.text = args['peso_atual']?.toString() ?? '';
         pesoAlmejadoController.text = args['peso_meta']?.toString() ?? '';
@@ -75,7 +74,7 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
       objetivo: tipoMetaController.text,
       pesoAtualStr: pesoAtualController.text,
       pesoMetaStr: pesoAlmejadoController.text,
-      dataInicioStr: _dataInicioOriginal, // Mantém a data de início que já estava no banco
+      dataInicioStr: _dataInicioOriginal,
       dataFimStr: dataFinalController.text,
     );
 
@@ -83,7 +82,10 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
 
     if (erro == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('🎯 Meta atualizada com sucesso!'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('🎯 Meta atualizada com sucesso!'),
+          backgroundColor: Colors.green,
+        ),
       );
       Navigator.pop(context, true); // Volta avisando que atualizou
     } else {
@@ -124,9 +126,11 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
             _buildInputLabel('Objetivo Principal'),
             TextField(
               controller: tipoMetaController,
-              decoration: _buildInputDecoration('Ex: Emagrecimento, Hipertrofia...'),
+              decoration: _buildInputDecoration(
+                'Ex: Emagrecimento, Hipertrofia...',
+              ),
             ),
-            
+
             const SizedBox(height: 24),
 
             // --- Campo: Peso Atual ---
@@ -155,7 +159,10 @@ class _EditarMetaPageState extends State<EditarMetaPage> {
               controller: dataFinalController,
               decoration: _buildInputDecoration(
                 'DD/MM/AAAA',
-                suffixIcon: Icon(Icons.calendar_month_outlined, color: Colors.grey[600]),
+                suffixIcon: Icon(
+                  Icons.calendar_month_outlined,
+                  color: Colors.grey[600],
+                ),
               ),
             ),
 
