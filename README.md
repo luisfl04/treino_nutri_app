@@ -8,9 +8,7 @@ A aplicação permitirá que o usuário cadastre, edite e acompanhe seus treinos
 
 # 2 Analise de requisitos 
 
-### 2.1 Atores
-
-## 2.2 Requisitos Funcionais
+## 2.1 Requisitos Funcionais
 
 - **RF01** – Cadastro de usuário  
 - **RF02** – Login de usuário  
@@ -24,7 +22,7 @@ A aplicação permitirá que o usuário cadastre, edite e acompanhe seus treinos
 - **RF10** – Upload de imagens (refeições ou progresso físico)  
 - **RF11** – Dashboard com resumo (calorias, treinos e evolução)  
 
-## 2.3 Requisitos Não Funcionais
+## 2.2 Requisitos Não Funcionais
 
 - **RNF01** – Interface simples, intuitiva e de fácil uso  
 - **RNF02** – Aplicação leve e otimizada  
