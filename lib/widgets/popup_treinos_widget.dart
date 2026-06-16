@@ -2,23 +2,23 @@ import 'package:flutter/material.dart';
 
 class SelecaoExerciciosDialog extends StatefulWidget {
   final List<String> selecionadosPreviamente;
-  final String tipoTreino; // <-- NOVO: Recebe o tipo selecionado (Ex: 'Yoga')
+  final String tipoTreino; // Recebe o tipo selecionado (Ex: 'Yoga')
 
   const SelecaoExerciciosDialog({
     super.key,
     this.selecionadosPreviamente = const [],
-    required this.tipoTreino, // Torna obrigatório
+    required this.tipoTreino,
   });
 
   @override
-  State<SelecaoExerciciosDialog> createState() => _SelecaoExerciciosDialogState();
+  State<SelecaoExerciciosDialog> createState() =>
+      _SelecaoExerciciosDialogState();
 }
 
 class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
   List<String> _selecionados = [];
-  List<String> _exerciciosFiltrados = []; // <-- Lista que será exibida na tela
+  List<String> _exerciciosFiltrados = [];
 
-  // MOCK FORMATADO: Agora os exercícios são separados pelo tipo exato da tela
   final Map<String, List<String>> _exerciciosPorTipo = {
     'Musculação': [
       'Tríceps Pulley',
@@ -55,7 +55,7 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
   void initState() {
     super.initState();
     _selecionados = List.from(widget.selecionadosPreviamente);
-    
+
     // FILTRAGEM MÁGICA: Pega apenas os exercícios do tipo escolhido
     _exerciciosFiltrados = _exerciciosPorTipo[widget.tipoTreino] ?? [];
   }
@@ -86,7 +86,7 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
           children: [
             // Exibe dinamicamente o tipo no título para o usuário ver o filtro ativo
             Text(
-              'Exercícios de ${widget.tipoTreino}', 
+              'Exercícios de ${widget.tipoTreino}',
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -94,7 +94,7 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
               ),
             ),
             const SizedBox(height: 24),
-            
+
             Flexible(
               child: SingleChildScrollView(
                 child: Column(
@@ -121,12 +121,16 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
                             height: 24,
                             child: Checkbox(
                               value: isSelected,
-                              onChanged: (val) => _toggleExercicio(exercicio, val),
+                              onChanged: (val) =>
+                                  _toggleExercicio(exercicio, val),
                               activeColor: const Color(0xFF0F7A40),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              side: const BorderSide(color: Color(0xFF1B1B1B), width: 1.5),
+                              side: const BorderSide(
+                                color: Color(0xFF1B1B1B),
+                                width: 1.5,
+                              ),
                             ),
                           ),
                         ],
@@ -136,9 +140,9 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 32),
-            
+
             // Botões Cancelar e Confirmar
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -147,10 +151,21 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
                   onPressed: () => Navigator.pop(context),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: Colors.grey.shade300),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
-                  child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Cancelar',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 OutlinedButton(
@@ -158,10 +173,21 @@ class _SelecaoExerciciosDialogState extends State<SelecaoExerciciosDialog> {
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.green.shade50,
                     side: BorderSide(color: Colors.green.shade200),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
-                  child: const Text('Confirmar', style: TextStyle(color: Color(0xFF1B7E3D), fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Confirmar',
+                    style: TextStyle(
+                      color: Color(0xFF1B7E3D),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),

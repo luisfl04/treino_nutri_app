@@ -14,7 +14,7 @@ class MetasCarouselWidget extends StatefulWidget {
 class _MetasCarouselWidgetState extends State<MetasCarouselWidget> {
   final MetaController _metaController = MetaController();
   List<Map<String, dynamic>> _metas = [];
-  
+
   final PageController _pageController = PageController(viewportFraction: 0.9);
   Timer? _timer;
   int _currentPage = 0;
@@ -46,7 +46,7 @@ class _MetasCarouselWidgetState extends State<MetasCarouselWidget> {
       } else {
         _currentPage = 0;
       }
-      
+
       if (_pageController.hasClients) {
         _pageController.animateToPage(
           _currentPage,
@@ -69,12 +69,15 @@ class _MetasCarouselWidgetState extends State<MetasCarouselWidget> {
     if (_metas.isEmpty) {
       return const Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-        child: Text('Nenhuma meta cadastrada.', style: TextStyle(color: Colors.grey)),
+        child: Text(
+          'Nenhuma meta cadastrada.',
+          style: TextStyle(color: Colors.grey),
+        ),
       );
     }
 
     return SizedBox(
-      height: 140, // Altura perfeita para um card sem botões
+      height: 140, 
       child: PageView.builder(
         controller: _pageController,
         onPageChanged: (int page) {
@@ -100,15 +103,16 @@ class _MetasCarouselWidgetState extends State<MetasCarouselWidget> {
               categoria: 'Corpo',
               progresso: '$porcentagem%',
               concluido: concluido,
-              // 👉 NAVEGAÇÃO AO CLICAR NO CARD 
+              //  NAVEGAÇÃO AO CLICAR NO CARD
               onTap: () {
                 Navigator.pushNamed(
-                  context, 
-                  AppRoutes.metaDetalhe, 
+                  context,
+                  AppRoutes.metaDetalhe,
                   arguments: meta,
-                ).then((_) => _carregarMetas()); // Recarrega se alterar a meta por lá
+                ).then(
+                  (_) => _carregarMetas(),
+                ); // Recarrega se alterar a meta por lá
               },
-              // NOTE: Não enviamos onEdit e onDelete aqui! Assim eles ficam invisíveis na Home.
             ),
           );
         },

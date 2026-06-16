@@ -5,6 +5,7 @@ class RefeicaoCard extends StatelessWidget {
   final String nome;
   final String calorias;
   final VoidCallback onEdit;
+  final VoidCallback onDelete;
   final VoidCallback onTap;
 
   const RefeicaoCard({
@@ -13,6 +14,7 @@ class RefeicaoCard extends StatelessWidget {
     required this.nome,
     required this.calorias,
     required this.onEdit,
+    required this.onDelete,
     required this.onTap,
   });
 
@@ -77,7 +79,7 @@ class RefeicaoCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            // Calorias e botão
+            // Calorias e botões
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -102,17 +104,36 @@ class RefeicaoCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                // Botão Editar
-                OutlinedButton.icon(
-                  onPressed: onEdit,
-                  icon: const Icon(Icons.edit, size: 16),
-                  label: const Text('Editar'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF1B7E3D),
-                    side: const BorderSide(
-                      color: Color(0xFF1B7E3D),
+                // 👉 Grupo de botões de Ação lado a lado
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Botão Editar
+                    OutlinedButton.icon(
+                      onPressed: onEdit,
+                      icon: const Icon(Icons.edit, size: 16),
+                      label: const Text('Editar'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF1B7E3D),
+                        side: const BorderSide(
+                          color: Color(0xFF1B7E3D),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8), // Espaço entre os dois botões
+                    // Botão Excluir (No mesmo estilo, mas em vermelho)
+                    OutlinedButton.icon(
+                      onPressed: onDelete,
+                      icon: const Icon(Icons.delete_outline, size: 16),
+                      label: const Text('Excluir'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

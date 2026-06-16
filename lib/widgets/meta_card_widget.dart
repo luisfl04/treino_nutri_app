@@ -4,10 +4,8 @@ class MetaCardWidget extends StatelessWidget {
   final String titulo;
   final String descricao;
   final String categoria;
-  final String progresso; 
+  final String progresso;
   final bool concluido;
-  
-  // 👉 VoidCallback com '?' os tornam opcionais
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback onTap;
@@ -51,7 +49,11 @@ class MetaCardWidget extends StatelessWidget {
                 child: Center(
                   child: Text(
                     progresso,
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: corPrimaria),
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: corPrimaria,
+                    ),
                   ),
                 ),
               )
@@ -59,7 +61,10 @@ class MetaCardWidget extends StatelessWidget {
               Container(
                 width: 70,
                 height: 70,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: corPrimaria),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: corPrimaria,
+                ),
                 child: const Icon(Icons.check, color: Colors.white, size: 36),
               ),
             const SizedBox(width: 16),
@@ -70,24 +75,41 @@ class MetaCardWidget extends StatelessWidget {
                 children: [
                   Text(
                     titulo,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1B1B1B)),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B1B1B),
+                    ),
                   ),
                   const SizedBox(height: 4),
-                  Text(descricao, style: TextStyle(fontSize: 13, color: Colors.grey[600])),
+                  Text(
+                    descricao,
+                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
+                  ),
                   const SizedBox(height: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(6)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                     child: Text(
                       categoria,
-                      style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.grey[700]),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey[700],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            // 👉 Se onEdit E onDelete forem nulos, não cria os botões no card (usado na Home)
+            // Se onEdit E onDelete forem nulos, não cria os botões no card (usado na Home)
             if (onEdit != null || onDelete != null)
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -101,7 +123,10 @@ class MetaCardWidget extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: corPrimaria,
                         side: const BorderSide(color: corPrimaria),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
                       ),
                     ),
                   if (onDelete != null) ...[
@@ -113,7 +138,10 @@ class MetaCardWidget extends StatelessWidget {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.red,
                         side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
                       ),
                     ),
                   ],

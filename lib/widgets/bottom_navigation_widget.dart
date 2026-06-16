@@ -63,7 +63,6 @@ class BottomNavigationWidget extends StatelessWidget {
   }
 }
 
-
 void _navigateToPage(BuildContext context, int index) {
   // 1. Descobre o nome da rota atual para evitar recarregar a mesma página
   String? currentRoute = ModalRoute.of(context)?.settings.name;
@@ -72,7 +71,7 @@ void _navigateToPage(BuildContext context, int index) {
     case 0:
       // Se já estiver na Home, não faz nada
       if (currentRoute == AppRoutes.home) return;
-      
+
       // Volta para a Home limpando todas as outras telas da pilha
       Navigator.pushNamedAndRemoveUntil(
         context,
@@ -83,9 +82,9 @@ void _navigateToPage(BuildContext context, int index) {
 
     case 1:
       if (currentRoute == AppRoutes.treinos) return;
-      
+
       // Primeiro volta para a Home (base) e depois abre Treinos por cima.
-      // Isso garante que se o usuário voltar, ele cai na Home em vez de uma tela preta.
+      // garante que se o usuário voltar, ele cai na Home em vez de uma tela preta.
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.home,
@@ -96,7 +95,7 @@ void _navigateToPage(BuildContext context, int index) {
 
     case 2:
       if (currentRoute == AppRoutes.alimentacao) return;
-      
+
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.home,
@@ -107,7 +106,7 @@ void _navigateToPage(BuildContext context, int index) {
 
     case 3:
       if (currentRoute == AppRoutes.metas) return;
-      
+
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.home,
@@ -118,7 +117,7 @@ void _navigateToPage(BuildContext context, int index) {
 
     case 4:
       if (currentRoute == AppRoutes.perfil) return;
-      
+
       Navigator.pushNamedAndRemoveUntil(
         context,
         AppRoutes.home,
@@ -128,4 +127,3 @@ void _navigateToPage(BuildContext context, int index) {
       break;
   }
 }
- 
