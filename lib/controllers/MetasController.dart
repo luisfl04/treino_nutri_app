@@ -16,12 +16,11 @@ class MetaController {
       double pesoMeta =
           double.tryParse(pesoMetaStr.replaceAll(',', '.')) ?? 0.0;
 
-      // Aqui idealmente você converte a data "dd/mm/yyyy" para formato ISO do banco.
-      // Simplificando, vamos salvar como texto padronizado temporariamente
+
       String dataInicioFormatada = dataInicioStr;
       String dataFimFormatada = dataFimStr;
 
-      // 2. Conexão com o banco e resgate do usuário
+      //  Conexão com o banco e resgate do usuário
       final dbConnection = DatabaseConnection();
       final db = await dbConnection.db;
 
@@ -75,7 +74,7 @@ class MetaController {
     }
   }
 
-  // 👉 DELETAR META DO BANCO
+  //  DELETAR META DO BANCO
   Future<String?> excluirMeta(int id) async {
     try {
       final dbConnection = DatabaseConnection();
@@ -88,7 +87,7 @@ class MetaController {
     }
   }
 
-  // 👉 ATUALIZAR META EXISTENTE (EDITAR)
+  //  ATUALIZAR META EXISTENTE (EDITAR)
   Future<String?> atualizarMeta({
     required int id,
     required String objetivo,
@@ -124,7 +123,7 @@ class MetaController {
     }
   }
 
-  // 👉 FINALIZAR META (100%)
+  //  FINALIZAR META (100%)
   Future<String?> finalizarMeta(int id) async {
     try {
       final dbConnection = DatabaseConnection();
@@ -139,6 +138,72 @@ class MetaController {
       return null;
     } catch (e) {
       return 'Erro ao finalizar a meta: $e';
+    }
+  }
+
+  //  FUNÇÃO PARA VINCULAR UM TREINO A UMA META NO BANCO DE DADOS
+  Future<String?> vincularTreinoAMeta(int treinoId, int metaId) async {
+    try {
+      final dbConnection = DatabaseConnection();
+      final db = await dbConnection.db;
+
+      await db.update(
+        'Treino',
+        {
+          'meta_id': metaId,
+        }, // Certifique-se que sua tabela Treino possui essa coluna
+        where: 'id = ?',
+        whereArgs: [treinoId],
+      );
+      return null; // Sucesso
+    } catch (e) {
+      return 'Erro ao vincular meta ao treino: $e';
+    }
+  }
+
+  //  RECALCULAR A PORCENTAGEM DA META COM BASE NOS TREINOS CONCLUÍDOS
+  Future<String?> atualizarPorcentagemMeta(int metaId) async {
+    try {
+      final dbConnection = DatabaseConnection();
+      final db = await dbConnection.db;
+
+      // 1. Conta o total de treinos vinculados a esta meta
+      final List<Map<String, dynamic>> totalTreinos = await db.query(
+        'Treino',
+        where: 'meta_id = ?',
+        whereArgs: [metaId],
+      );
+
+      if (totalTreinos.isEmpty) {
+        // Se não há treinos, a porcentagem volta para 0
+        await db.update('Meta', {'porcentagem': 0}, where: 'id = ?', whereArgs: [metaId]);
+        return null;
+      }
+
+      // 2. Conta quantos desses treinos estão concluídos (done == 1)
+      final List<Map<String, dynamic>> treinosConcluidos = await db.query(
+        'Treino',
+        where: 'meta_id = ? AND done = 1',
+        whereArgs: [metaId],
+      );
+
+      // 3. Calcula a nova porcentagem (Ex: 2 concluídos de 4 totais = 50%)
+      int novaPorcentagem = ((treinosConcluidos.length / totalTreinos.length) * 100).round();
+
+      // Garantir que não passe de 100% por segurança
+      if (novaPorcentagem > 100) novaPorcentagem = 100;
+
+      // 4. Salva a nova porcentagem no banco de dados
+      await db.update(
+        'Meta',
+        {'porcentagem': novaPorcentagem},
+        where: 'id = ?',
+        whereArgs: [metaId],
+      );
+
+      return null; // Sucesso
+    } catch (e) {
+      return 'Erro ao atualizar progresso da meta: $e';
     }
   }
 }
